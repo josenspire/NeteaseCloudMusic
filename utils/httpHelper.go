@@ -1,19 +1,17 @@
 package utils
 
 import (
-	"math/rand"
-	"fmt"
-	"math"
-	"time"
-	"net/http"
-	"bytes"
-	"io/ioutil"
 	"NeteaseCloudMusic/models"
+	"bytes"
 	"encoding/json"
+	"fmt"
+	"io/ioutil"
 	"log"
+	"math"
+	"math/rand"
+	"net/http"
+	"time"
 )
-
-var baseCookie BaseCookie
 
 var userAgentList = []string{
 	"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.115 Safari/537.36",
@@ -53,10 +51,11 @@ func NeteaseCloudRequest(url string, params models.RequestObject, method string)
 		return response
 	}
 
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(object))
+	req, err := http.NewRequest(method, url, bytes.NewBuffer(object))
 
-	BaseCookie{}.GenerateBaseCookie()
-	cookie := baseCookie.baseCookie
+	bc := BaseCookie{}
+	bc.GenerateBaseCookie()
+	cookie := bc.BaseCookie
 
 	req.Header.Set("Accept", "*/*")
 	req.Header.Set("Accept-Language", "zh-CN,zh;q=0.8,gl;q=0.6,zh-TW;q=0.4")
@@ -68,7 +67,7 @@ func NeteaseCloudRequest(url string, params models.RequestObject, method string)
 	if params.Cookie != "" {
 		cookie = cookie + "; " + params.Cookie
 	}
-	req.Header.Set("Cookie",  cookie)
+	req.Header.Set("Cookie", cookie)
 
 	client := &http.Client{}
 	resp, err := client.Do(req)

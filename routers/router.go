@@ -16,6 +16,8 @@ import (
 func init() {
 	beego.Router("/", &controllers.IndexController{}, "get:RenderIndex")
 
+	beego.Router("/test", &controllers.IndexController{}, "get:RequestTesting")
+
 	ns := beego.NewNamespace("/v1",
 		beego.NSNamespace("/user",
 			// beego.NSInclude(

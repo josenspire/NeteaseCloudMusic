@@ -1,6 +1,9 @@
 package controllers
 
-import "github.com/astaxie/beego"
+import (
+	"fmt"
+	"github.com/astaxie/beego"
+)
 
 // Operations about object
 type IndexController struct {
@@ -16,4 +19,13 @@ func (i *IndexController) RenderIndex() {
 	i.Data["Website"] = "Beego.me"
 	i.Data["Email"] = "josenspire@gmail.com"
 	i.TplName = "index.tpl"
+}
+
+func (i *IndexController) RequestTesting() {
+	input := i.Ctx.Input.Cookie
+
+	fmt.Println(input)
+
+	i.Data["json"] = input
+	i.ServeJSON()
 }
