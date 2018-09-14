@@ -10,6 +10,7 @@ import (
 	"math"
 	"math/rand"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -86,9 +87,17 @@ func NeteaseCloudRequest(url string, params models.RequestObject, method string)
 	return response
 }
 
-func checkError(e error) {
-	if e != nil {
-		log.Fatalf("Error happend: %s", e.Error())
+func generateCookie(cookie *[]string) {
+	const cookieStr = `appver=1.5.9;os=osx; channel=netease;osver=%E7%89%88%E6%9C%AC%2010.13.2%EF%BC%88%E7%89%88%E5%8F%B7%2017C88%EF%BC%89`
+	cookieArray := strings.Split(cookieStr, ";")
+	for _, ck := range cookieArray {
+		_ = append(*cookie, ck+";Path=/")
+	}
+}
+
+func checkError(err error) {
+	if err != nil {
+		log.Fatalf("Error happend: %s", err.Error())
 		return
 	}
 }
