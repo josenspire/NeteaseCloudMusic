@@ -1,18 +1,32 @@
 package utils
 
 import (
-	"NeteaseCloudMusic/models"
-	"bytes"
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"github.com/astaxie/beego/httplib"
 	"log"
 	"math"
 	"math/rand"
-	"net/http"
 	"strings"
 	"time"
 )
+
+type Response struct {
+	Code    int
+	Data    []byte
+	Message string
+}
+
+func (rs *Response) SetResponse(code int, data []byte, message string) {
+	rs.Code = code
+	rs.Data = data
+	rs.Message = message
+}
+
+func (rs *Response) PrintResponse() {
+	fmt.Println(rs.Code)
+	fmt.Println(rs.Data)
+	fmt.Println(rs.Message)
+}
 
 var userAgentList = []string{
 	"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.115 Safari/537.36",
@@ -42,49 +56,83 @@ func randomUserAgent() string {
 	return userAgentList[int(num)]
 }
 
-func NeteaseCloudRequest(url string, params models.RequestObject, method string) models.Response {
-	response := models.Response{}
+// func NeteaseCloudRequest(url string, params interface{}, method string) ([]byte, error) {
+// 	response := Response{}
+//
+// 	byte, err := json.Marshal(params)
+// 	checkError(err)
+//
+// 	req, err := http.NewRequest(method, url, bytes.NewBuffer(byte))
+//
+// 	SetupHeader(req)
+//
+// 	// if params.Cookie != "" {
+// 	// 	cookie = cookie + "; " + params.Cookie
+// 	// }
+// 	// req.Header.Set("Cookie", cookie)
+//
+// 	client := &http.Client{}
+// 	resp, err := client.Do(req)
+// 	if err != nil {
+// 		checkError(err)
+// 	}
+// 	defer resp.Body.Close()
+//
+// 	resqHost := resp.Request.Host // 有的代理IP被DNS劫持，不干净
+//
+// 	if !strings.Contains(resqHost, "163") {
+// 		response.SetResponse(http.StatusBadRequest, nil, "Request is error")
+// 		return json.Marshal(response)
+// 	}
+//
+// 	statusCode := resp.StatusCode
+// 	// hea := resp.Header
+//
+// 	body, _ := ioutil.ReadAll(resp.Body)
+//
+// 	response.SetResponse(statusCode, body, "")
+// 	return json.Marshal(response)
+// }
 
-	object, error := json.Marshal(params)
-	if error != nil {
-		log.Fatalf("Format params error: %s", error.Error())
-		response.SetResponse(http.StatusBadRequest, nil, "")
-		return response
+func NeteaseCloudRequest(url string, params map[string]string, method string) Response {
+	req := httplib.NewBeegoRequest(url, method)
+	SetupHeader(req)
+
+	for key, value := range params {
+		req.Param(key, value)
 	}
 
-	req, err := http.NewRequest(method, url, bytes.NewBuffer(object))
+	res := Response{}
+	// req.ToJSON(&res)
 
+	_req := req.GetRequest()
+	fmt.Println("=====", _req)
+
+	for k, v := range _req.Header {
+		fmt.Println(k, v)
+	}
+
+	return res
+}
+
+func SetupHeader(req *httplib.BeegoHTTPRequest) {
 	bc := BaseCookie{}
 	bc.GenerateBaseCookie()
-	cookie := bc.BaseCookie
 
-	req.Header.Set("Accept", "*/*")
-	req.Header.Set("Accept-Language", "zh-CN,zh;q=0.8,gl;q=0.6,zh-TW;q=0.4")
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-	req.Header.Set("Referer", "http://music.163.com")
-	req.Header.Set("Host", "music.163.com")
-	req.Header.Set("User-Agent", randomUserAgent())
-
-	if params.Cookie != "" {
-		cookie = cookie + "; " + params.Cookie
+	headers := map[string]string{
+		"Accept":          "*/*",
+		"Accept-Language": "zh-CN,zh;q=0.8,gl;q=0.6,zh-TW;q=0.4",
+		"Connection":      "keep-alive",
+		"Content-Type":    "application/x-www-form-urlencoded",
+		"Referer":         "http://music.163.com",
+		"Host":            "music.163.com",
+		"Cookie":          bc.BaseCookie,
+		"User-Agent":      randomUserAgent(),
 	}
-	req.Header.Set("Cookie", cookie)
 
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		checkError(err)
+	for key, value := range headers {
+		req.Header(key, value)
 	}
-	defer resp.Body.Close()
-
-	statusCode := resp.StatusCode
-	hea := resp.Header
-	body, _ := ioutil.ReadAll(resp.Body)
-	fmt.Println(hea)
-
-	response.SetResponse(statusCode, body, "")
-	response.PrintResponse()
-	return response
 }
 
 func generateCookie(cookie *[]string) {

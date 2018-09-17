@@ -23,7 +23,7 @@ func init() {
 			// beego.NSInclude(
 			// 	&controllers.UserController{},
 			// ),
-			beego.NSRouter("/cellphone", &controllers.UserController{}, "get:CellphoneLogin"),
+			beego.NSRouter("/cellphone", &controllers.UserController{}, "post:CellphoneLogin"),
 		),
 		beego.NSNamespace("/object",
 			beego.NSInclude(

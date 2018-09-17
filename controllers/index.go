@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"github.com/astaxie/beego"
 )
 
@@ -22,9 +21,7 @@ func (i *IndexController) RenderIndex() {
 }
 
 func (i *IndexController) RequestTesting() {
-	input := i.Ctx.Input.Cookie
-
-	fmt.Println(input)
+	input := i.Ctx.Input.Cookie("user_session")
 
 	i.Data["json"] = input
 	i.ServeJSON()

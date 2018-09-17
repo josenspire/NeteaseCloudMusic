@@ -6,6 +6,8 @@ import (
 	"crypto/cipher"
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
+	"math/big"
 	"strings"
 )
 
@@ -39,7 +41,6 @@ func (ct *Crypto) Encrypt(originData interface{}) (string, error) {
 
 	encTextStr, _ := aesEncrypt(originDataObj, nonce)
 	encText, _ := aesEncrypt([]byte(encTextStr), ct.SecretKey)
-	// const encSecKey = rsaEncrypt(secKey, pubKey, modulus)
 	return encText, nil
 }
 
@@ -52,6 +53,11 @@ func (ct *Crypto) Decrypt(decodeStr string) (string, error) {
 	decTextStr, _ := aesDecrypt(decodeStr, ct.SecretKey)
 	decText, _ := aesDecrypt(decTextStr, nonce)
 	return decText, nil
+}
+
+func (ct *Crypto) RSAEncrypt(originData string) string {
+	encSecKey := rsaEncrypt(originData, pubKey, modulus)
+	return encSecKey
 }
 
 // AES加密的具体算法为: AES-128-CBC，输出格式为 base64
@@ -97,6 +103,43 @@ func aesDecrypt(decodeStr string, secretKeyStr string) (string, error) {
 		return params.(string), nil
 	}
 	return string(originData[:]), nil
+}
+
+func rsaEncrypt(plainText string, pubKey string, modulus string) string {
+	// 倒序 key
+	rKey := ""
+	for i := len(plainText) - 1; i >= 0; i-- {
+		rKey += plainText[i : i+1]
+	}
+	// 将 key 转 ascii 编码 然后转成 16 进制字符串
+	hexRKey := ""
+	for _, char := range []rune(rKey) {
+		hexRKey += fmt.Sprintf("%x", int(char))
+	}
+	// 将 16进制 的 三个参数 转为10进制的 bigint
+	bigRKey, _ := big.NewInt(0).SetString(hexRKey, 16)
+	bigPubKey, _ := big.NewInt(0).SetString(pubKey, 16)
+	bigModulus, _ := big.NewInt(0).SetString(modulus, 16)
+	// 执行幂乘取模运算得到最终的bigint结果
+	bigRs := bigRKey.Exp(bigRKey, bigPubKey, bigModulus)
+	// 将结果转为 16进制字符串
+	hexRs := fmt.Sprintf("%x", bigRs)
+	// 可能存在不满256位的情况，要在前面补0补满256位
+	return addRSAPadding(hexRs, modulus)
+}
+
+// 补0步骤
+func addRSAPadding(encText string, modulus string) string {
+	ml := len(modulus)
+	for i := 0; ml > 0 && modulus[i:i+1] == "0"; i++ {
+		ml--
+	}
+	num := ml - len(encText)
+	prefix := ""
+	for i := 0; i < num; i++ {
+		prefix += "0"
+	}
+	return prefix + encText
 }
 
 func pKCS5Padding(cipherText []byte, blockSize int) []byte {

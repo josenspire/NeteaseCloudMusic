@@ -2,17 +2,14 @@ package controllers
 
 import (
 	"NeteaseCloudMusic/models"
+	"encoding/json"
+	"fmt"
 	"github.com/astaxie/beego"
 )
 
 // Operations about Users
 type UserController struct {
 	beego.Controller
-}
-
-func (u *UserController) CellphoneLogin() {
-	u.Data["json"] = "test success"
-	u.ServeJSON()
 }
 
 // @Title Delete
@@ -34,15 +31,29 @@ func (u *UserController) Delete() {
 // @Param	password		query 	string	true		"The password for login"
 // @Success 200 {string} login success
 // @Failure 403 user not exist
-// @router /login [get]
-func (u *UserController) Login() {
-	username := u.GetString("username")
-	password := u.GetString("password")
-	if models.Login(username, password) {
-		u.Data["json"] = "login success"
-	} else {
-		u.Data["json"] = "user not exist"
-	}
+// @router /login [post]
+func (u *UserController) CellphoneLogin() {
+	var user models.User
+	json.Unmarshal(u.Ctx.Input.RequestBody, &user)
+
+	fmt.Println(user)
+
+	username := user.Username
+	password := user.Password
+
+	fmt.Printf("Username: %s;\nPassword: %s\n", username, password)
+
+	resultByte := models.Login(user)
+
+	// var response utils.Response
+	// json.Unmarshal(resultByte, &response)
+	//
+	// decodeStr := response.Data[:]
+	fmt.Println("-----------------", resultByte)
+
+	// result, _ := base64.StdEncoding.DecodeString(string(decodeStr))
+
+	u.Data["json"] = resultByte
 	u.ServeJSON()
 }
 

@@ -64,3 +64,18 @@ func TestDecrypt(t *testing.T) {
 		})
 	})
 }
+
+func TestRSAEncrypt(t *testing.T) {
+	const originData string = `{"Username": "james", "Password": "123456"}`
+	const expectation string = `858130a0a5e6c330d4ca8d439841147f1f131ddb7d91e8b2cd2d00556c7e84702b12e0e3347d387e2dbbe53fcefa04008936075bb46b0c1c99c90dcceda33a14900ec3a74579822eebcd1208a8beee14d69180d131aa64100f81a21436d00ebd48ff69f800282c94420dc8d22bad7ee4cd0f48214f81f0eb1484bd60d644f89e`
+
+	crypto := utils.Crypto{}
+
+	actualResult := crypto.RSAEncrypt(originData)
+
+	Convey("Subject: Crypto RSADecrypt Test Station Endpoint\n", t, func() {
+		Convey("RSAEncrypt should encrypt originData with rsa and return result", func() {
+			So(actualResult, ShouldEqual, expectation)
+		})
+	})
+}
