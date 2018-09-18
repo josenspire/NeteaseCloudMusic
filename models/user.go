@@ -2,8 +2,9 @@ package models
 
 import (
 	"NeteaseCloudMusic/utils"
+	"crypto/md5"
+	"fmt"
 	"net/http"
-	"reflect"
 )
 
 var (
@@ -23,15 +24,14 @@ const (
 )
 
 func Login(user User) utils.Response {
+	data := []byte(user.Password)
+	has := md5.Sum(data)
 
-	t := reflect.TypeOf(user)
-	v := reflect.ValueOf(user)
+	user.Password = fmt.Sprintf("%x", has)
 
-	var params = make(map[string]string)
+	fmt.Println(user)
 
-	for i := 0; i < t.NumField(); i++ {
-		params[t.Field(i).Name] = v.Field(i).String()
-	}
+	params := utils.TransformStruct2Map(user)
 
 	response := utils.NeteaseCloudRequest(cellphoneLoginUrl, params, http.MethodPost)
 	return response

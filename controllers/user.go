@@ -38,11 +38,6 @@ func (u *UserController) CellphoneLogin() {
 
 	fmt.Println(user)
 
-	username := user.Username
-	password := user.Password
-
-	fmt.Printf("Username: %s;\nPassword: %s\n", username, password)
-
 	resultByte := models.Login(user)
 
 	// var response utils.Response

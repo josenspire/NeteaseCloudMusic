@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/astaxie/beego/httplib"
 	"log"
@@ -8,6 +9,10 @@ import (
 	"math/rand"
 	"strings"
 	"time"
+)
+
+const (
+	host = "http://music.163.com"
 )
 
 type Response struct {
@@ -94,42 +99,52 @@ func randomUserAgent() string {
 // 	return json.Marshal(response)
 // }
 
-func NeteaseCloudRequest(url string, params map[string]string, method string) Response {
-	req := httplib.NewBeegoRequest(url, method)
+func NeteaseCloudRequest(url string, params map[string]interface{}, method string) Response {
+	req := httplib.NewBeegoRequest(host+url, method)
+	// req := httplib.Post(host + url)
 	SetupHeader(req)
 
-	for key, value := range params {
-		req.Param(key, value)
-	}
+	_params, _ := json.Marshal(params)
+	crypto := Crypto{}
+	encText, encSeckey, err := crypto.Encrypt(_params)
+	checkError(err)
 
-	res := Response{}
-	// req.ToJSON(&res)
+	// paramsMap := make(map[string]string)
+	// paramsMap["params"] = encText
+	// paramsMap["encSeckey"] = encSeckey
 
-	_req := req.GetRequest()
-	fmt.Println("=====", _req)
+	paramsMap := `params=` + encText + `&encSeckey=` + encSeckey
 
-	for k, v := range _req.Header {
-		fmt.Println(k, v)
-	}
+	req.Param("csrf_token", "")
+	req.Body(paramsMap)
 
-	return res
+	req.DoRequest()
+	// res, _ := req.Response()
+	// checkError(err)
+
+	// fmt.Println(req.GetRequest().Body)
+
+	result, _ := req.String()
+
+	fmt.Println("===========", req.GetRequest())
+
+	fmt.Println("result: ", result)
+	return Response{}
 }
 
 func SetupHeader(req *httplib.BeegoHTTPRequest) {
-	bc := BaseCookie{}
-	bc.GenerateBaseCookie()
-
+	// bc := BaseCookie{}
+	// bc.GenerateBaseCookie()
 	headers := map[string]string{
 		"Accept":          "*/*",
 		"Accept-Language": "zh-CN,zh;q=0.8,gl;q=0.6,zh-TW;q=0.4",
 		"Connection":      "keep-alive",
 		"Content-Type":    "application/x-www-form-urlencoded",
-		"Referer":         "http://music.163.com",
+		"Referer":         "http://music.163.com/",
 		"Host":            "music.163.com",
-		"Cookie":          bc.BaseCookie,
+		"Cookie":          "appver=1.5.9",
 		"User-Agent":      randomUserAgent(),
 	}
-
 	for key, value := range headers {
 		req.Header(key, value)
 	}

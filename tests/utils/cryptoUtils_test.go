@@ -34,7 +34,7 @@ func TestEncrypt(t *testing.T) {
 	const originData string = `{"Username":"james","Password":"123","CsrfToken":"token123"}`
 	crypto := utils.Crypto{}
 
-	actualResult, _ := crypto.Encrypt(originData)
+	actualResult, _, _ := crypto.Encrypt(originData)
 
 	Convey("Subject: Crypto Encrypt Test Station Endpoint\n", t, func() {
 		Convey("Encrypt should encrypt the data then return base64 result", func() {
@@ -51,7 +51,7 @@ func TestDecrypt(t *testing.T) {
 
 	crypto.SecretKey = "1234567890asdfgh"
 
-	encryptResult, _ := crypto.Encrypt(originData)
+	encryptResult, _, _ := crypto.Encrypt(originData)
 
 	actualResult, _ := crypto.Decrypt(encryptResult)
 

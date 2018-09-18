@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"math/big"
+	"net/url"
 	"strings"
 )
 
@@ -28,20 +29,26 @@ func (ct *Crypto) CreateSecretKey() {
 	ct.SecretKey = GenerateRandomString(keys, 16)
 }
 
-func (ct *Crypto) Encrypt(originData interface{}) (string, error) {
+func (ct *Crypto) Encrypt(originData string) (string, string, error) {
 
-	originDataObj, err := json.Marshal(originData)
+	// originDataObj, err := json.Marshal(originData)
+	// if err != nil {
+	// 	checkError(err)
+	// }
 
-	if err != nil {
-		checkError(err)
-	}
 	if strings.EqualFold("", ct.SecretKey) {
 		ct.CreateSecretKey()
 	}
 
-	encTextStr, _ := aesEncrypt(originDataObj, nonce)
-	encText, _ := aesEncrypt([]byte(encTextStr), ct.SecretKey)
-	return encText, nil
+	encTextStr, _ := aesEncrypt2(originData, nonce)
+	encText, _ := aesEncrypt2(encTextStr, ct.SecretKey)
+
+	fmt.Println("==========", encTextStr)
+	fmt.Println("==========", encText)
+
+	encSeckey := ct.RSAEncrypt(ct.SecretKey, pubKey, modulus)
+
+	return url.QueryEscape(encText), url.QueryEscape(encSeckey), nil
 }
 
 func (ct *Crypto) Decrypt(decodeStr string) (string, error) {
@@ -55,8 +62,8 @@ func (ct *Crypto) Decrypt(decodeStr string) (string, error) {
 	return decText, nil
 }
 
-func (ct *Crypto) RSAEncrypt(originData string) string {
-	encSecKey := rsaEncrypt(originData, pubKey, modulus)
+func (ct *Crypto) RSAEncrypt(secKey string, pubKey string, modulus string) string {
+	encSecKey := rsaEncrypt(secKey, pubKey, modulus)
 	return encSecKey
 }
 
@@ -105,11 +112,11 @@ func aesDecrypt(decodeStr string, secretKeyStr string) (string, error) {
 	return string(originData[:]), nil
 }
 
-func rsaEncrypt(plainText string, pubKey string, modulus string) string {
+func rsaEncrypt(secKey string, pubKey string, modulus string) string {
 	// 倒序 key
 	rKey := ""
-	for i := len(plainText) - 1; i >= 0; i-- {
-		rKey += plainText[i : i+1]
+	for i := len(secKey) - 1; i >= 0; i-- {
+		rKey += secKey[i : i+1]
 	}
 	// 将 key 转 ascii 编码 然后转成 16 进制字符串
 	hexRKey := ""
@@ -153,4 +160,20 @@ func pKCS5UnPadding(originData []byte) []byte {
 	length := len(originData)
 	unPadding := int(originData[length-1])
 	return originData[:(length - unPadding)]
+}
+
+// --------------------------------------------------------
+func aesEncrypt2(sSrc string, sKey string) (string, error) {
+	iv := []byte(iv)
+	block, err := aes.NewCipher([]byte(sKey))
+	if err != nil {
+		return "", err
+	}
+	padding := block.BlockSize() - len([]byte(sSrc))%block.BlockSize()
+	src := append([]byte(sSrc), bytes.Repeat([]byte{byte(padding)}, padding)...)
+	model := cipher.NewCBCEncrypter(block, iv)
+	cipherText := make([]byte, len(src))
+	model.CryptBlocks(cipherText, src)
+
+	return base64.StdEncoding.EncodeToString(cipherText), nil
 }

@@ -55,6 +55,14 @@ func init() {
 			MethodParams:     param.Make(),
 			Params:           nil})
 
+	beego.GlobalControllerRouter["NeteaseCloudMusic/controllers:SearchController"] = append(beego.GlobalControllerRouter["NeteaseCloudMusic/controllers:SearchController"],
+		beego.ControllerComments{
+			Method:           "Search",
+			Router:           `/`,
+			AllowHTTPMethods: []string{"post"},
+			MethodParams:     param.Make(),
+			Params:           nil})
+
 	beego.GlobalControllerRouter["NeteaseCloudMusic/controllers:UserController"] = append(beego.GlobalControllerRouter["NeteaseCloudMusic/controllers:UserController"],
 		beego.ControllerComments{
 			Method:           "Delete",
