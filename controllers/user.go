@@ -38,17 +38,9 @@ func (u *UserController) CellphoneLogin() {
 
 	fmt.Println(user)
 
-	resultByte := models.Login(user)
+	result := models.Login(user)
 
-	// var response utils.Response
-	// json.Unmarshal(resultByte, &response)
-	//
-	// decodeStr := response.Data[:]
-	fmt.Println("-----------------", resultByte)
-
-	// result, _ := base64.StdEncoding.DecodeString(string(decodeStr))
-
-	u.Data["json"] = resultByte
+	u.Data["json"] = result
 	u.ServeJSON()
 }
 

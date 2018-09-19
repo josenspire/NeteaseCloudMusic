@@ -31,7 +31,7 @@ func TestCreateSecretKey(t *testing.T) {
 }
 
 func TestEncrypt(t *testing.T) {
-	const originData string = `{"Username":"james","Password":"123","CsrfToken":"token123"}`
+	const originData string = `{"Username":"13631270436","Password":"123456789"}`
 	crypto := utils.Crypto{}
 
 	actualResult, _, _ := crypto.Encrypt(originData)
@@ -45,7 +45,7 @@ func TestEncrypt(t *testing.T) {
 
 func TestDecrypt(t *testing.T) {
 	const originData string = `{"Username":"james","Password":"123","CsrfToken":"token123"}`
-	const expectationEncryptStr string = "DLAFT+WsUAcj3c7DZb9hspl4yyhLWFfh2h+sqswVOEh4ApN/z27wN4hWDVZhRvDDm+RrEc3+OOeVVEwbSzQeDXCLp8MZee9+FT41zZSnZUcyzY9iMbgjTHO2nkKeMcuTGW6+nzt4F7MKG9VprsgdMw=="
+	const expectationEncryptStr string = "DLAFT%2BWsUAcj3c7DZb9hspl4yyhLWFfh2h%2BsqswVOEh4ApN%2Fz27wN4hWDVZhRvDDm%2BRrEc3%2BOOeVVEwbSzQeDXCLp8MZee9%2BFT41zZSnZUcyzY9iMbgjTHO2nkKeMcuTGW6%2Bnzt4F7MKG9VprsgdMw%3D%3D"
 
 	crypto := utils.Crypto{}
 
@@ -69,9 +69,14 @@ func TestRSAEncrypt(t *testing.T) {
 	const originData string = `{"Username": "james", "Password": "123456"}`
 	const expectation string = `858130a0a5e6c330d4ca8d439841147f1f131ddb7d91e8b2cd2d00556c7e84702b12e0e3347d387e2dbbe53fcefa04008936075bb46b0c1c99c90dcceda33a14900ec3a74579822eebcd1208a8beee14d69180d131aa64100f81a21436d00ebd48ff69f800282c94420dc8d22bad7ee4cd0f48214f81f0eb1484bd60d644f89e`
 
+	const (
+		pubKey = "010001"
+		iv     = "0102030405060708"
+	)
+
 	crypto := utils.Crypto{}
 
-	actualResult := crypto.RSAEncrypt(originData)
+	actualResult := crypto.RSAEncrypt(originData, pubKey, iv)
 
 	Convey("Subject: Crypto RSADecrypt Test Station Endpoint\n", t, func() {
 		Convey("RSAEncrypt should encrypt originData with rsa and return result", func() {

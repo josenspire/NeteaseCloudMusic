@@ -8,7 +8,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"math/big"
-	"net/url"
+	"math/rand"
 	"strings"
 )
 
@@ -24,37 +24,45 @@ type Crypto struct {
 	OriginData interface{}
 }
 
-func (ct *Crypto) CreateSecretKey() {
+func (ct *Crypto) CreateSecretKey(size int) string {
 	const keys string = `abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789`
-	ct.SecretKey = GenerateRandomString(keys, 16)
+	// ct.SecretKey = GenerateRandomString(keys, 16)
+
+	// 也就是从 a~9 以及 +/ 中随机拿出指定数量的字符拼成一个 key
+	// const keys = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789+/"
+	rs := ""
+	for i := 0; i < size; i++ {
+		pos := rand.Intn(len(keys))
+		rs += keys[pos : pos+1]
+	}
+	ct.SecretKey = rs
+	return rs
 }
 
 func (ct *Crypto) Encrypt(originData string) (string, string, error) {
-
-	// originDataObj, err := json.Marshal(originData)
+	// encodeBytes, err := json.Marshal(originData)
 	// if err != nil {
 	// 	checkError(err)
 	// }
 
 	if strings.EqualFold("", ct.SecretKey) {
-		ct.CreateSecretKey()
+		ct.CreateSecretKey(16)
 	}
 
-	encTextStr, _ := aesEncrypt2(originData, nonce)
-	encText, _ := aesEncrypt2(encTextStr, ct.SecretKey)
-
-	fmt.Println("==========", encTextStr)
-	fmt.Println("==========", encText)
-
+	encTextStr, _ := aesEncrypt(originData, nonce)
+	encText, _ := aesEncrypt(encTextStr, ct.SecretKey)
 	encSeckey := ct.RSAEncrypt(ct.SecretKey, pubKey, modulus)
 
-	return url.QueryEscape(encText), url.QueryEscape(encSeckey), nil
+	fmt.Println("==========", encText)
+	fmt.Println("==========", encSeckey)
+
+	return encText, encSeckey, nil
 }
 
 func (ct *Crypto) Decrypt(decodeStr string) (string, error) {
 
 	if strings.EqualFold("", ct.SecretKey) {
-		ct.CreateSecretKey()
+		ct.CreateSecretKey(16)
 	}
 
 	decTextStr, _ := aesDecrypt(decodeStr, ct.SecretKey)
@@ -71,8 +79,10 @@ func (ct *Crypto) RSAEncrypt(secKey string, pubKey string, modulus string) strin
 // AES加密时需要指定 iv：0102030405060708
 // AES加密时需要 padding
 // https://github.com/darknessomi/musicbox/wiki/%E7%BD%91%E6%98%93%E4%BA%91%E9%9F%B3%E4%B9%90%E6%96%B0%E7%99%BB%E5%BD%95API%E5%88%86%E6%9E%90
-func aesEncrypt(encodeBytes []byte, secretKeyStr string) (string, error) {
+func aesEncrypt(encodeStr string, secretKeyStr string) (string, error) {
 	secretKey := []byte(secretKeyStr)
+	encodeBytes := []byte(encodeStr)
+
 	block, err := aes.NewCipher(secretKey)
 	if err != nil {
 		return "", err
@@ -82,10 +92,10 @@ func aesEncrypt(encodeBytes []byte, secretKeyStr string) (string, error) {
 	encodeBytes = pKCS5Padding(encodeBytes, blockSize)
 
 	blockMode := cipher.NewCBCEncrypter(block, []byte(iv))
-	crypted := make([]byte, len(encodeBytes))
-	blockMode.CryptBlocks(crypted, encodeBytes)
+	cipherText := make([]byte, len(encodeBytes))
+	blockMode.CryptBlocks(cipherText, encodeBytes)
 
-	return base64.StdEncoding.EncodeToString(crypted), nil
+	return base64.StdEncoding.EncodeToString(cipherText), nil
 }
 
 func aesDecrypt(decodeStr string, secretKeyStr string) (string, error) {
@@ -151,7 +161,6 @@ func addRSAPadding(encText string, modulus string) string {
 
 func pKCS5Padding(cipherText []byte, blockSize int) []byte {
 	padding := blockSize - len(cipherText)%blockSize // 16, 32, 48 etc..
-	// 填充
 	paddingText := bytes.Repeat([]byte{byte(padding)}, padding)
 	return append(cipherText, paddingText...)
 }
@@ -160,20 +169,4 @@ func pKCS5UnPadding(originData []byte) []byte {
 	length := len(originData)
 	unPadding := int(originData[length-1])
 	return originData[:(length - unPadding)]
-}
-
-// --------------------------------------------------------
-func aesEncrypt2(sSrc string, sKey string) (string, error) {
-	iv := []byte(iv)
-	block, err := aes.NewCipher([]byte(sKey))
-	if err != nil {
-		return "", err
-	}
-	padding := block.BlockSize() - len([]byte(sSrc))%block.BlockSize()
-	src := append([]byte(sSrc), bytes.Repeat([]byte{byte(padding)}, padding)...)
-	model := cipher.NewCBCEncrypter(block, iv)
-	cipherText := make([]byte, len(src))
-	model.CryptBlocks(cipherText, src)
-
-	return base64.StdEncoding.EncodeToString(cipherText), nil
 }

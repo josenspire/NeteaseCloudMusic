@@ -20,10 +20,10 @@ type Profile struct {
 }
 
 const (
-	cellphoneLoginUrl = "http://music.163.com/weapi/login/cellphone"
+	cellphoneLoginUrl = "/weapi/login/cellphone?csrf_token="
 )
 
-func Login(user User) utils.Response {
+func Login(user User) string {
 	data := []byte(user.Password)
 	has := md5.Sum(data)
 

@@ -15,24 +15,6 @@ const (
 	host = "http://music.163.com"
 )
 
-type Response struct {
-	Code    int
-	Data    []byte
-	Message string
-}
-
-func (rs *Response) SetResponse(code int, data []byte, message string) {
-	rs.Code = code
-	rs.Data = data
-	rs.Message = message
-}
-
-func (rs *Response) PrintResponse() {
-	fmt.Println(rs.Code)
-	fmt.Println(rs.Data)
-	fmt.Println(rs.Message)
-}
-
 var userAgentList = []string{
 	"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.115 Safari/537.36",
 	"Mozilla/5.0 (iPhone; CPU iPhone OS 9_1 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13B143 Safari/601.1",
@@ -99,37 +81,26 @@ func randomUserAgent() string {
 // 	return json.Marshal(response)
 // }
 
-func NeteaseCloudRequest(url string, params map[string]interface{}, method string) Response {
+func NeteaseCloudRequest(url string, params map[string]interface{}, method string) string {
 	req := httplib.NewBeegoRequest(host+url, method)
 	// req := httplib.Post(host + url)
 	SetupHeader(req)
 
 	_params, _ := json.Marshal(params)
 	crypto := Crypto{}
-	encText, encSeckey, err := crypto.Encrypt(_params)
+	encText, encSeckey, err := crypto.Encrypt(string(_params))
 	checkError(err)
-
-	// paramsMap := make(map[string]string)
-	// paramsMap["params"] = encText
-	// paramsMap["encSeckey"] = encSeckey
 
 	paramsMap := `params=` + encText + `&encSeckey=` + encSeckey
 
-	req.Param("csrf_token", "")
 	req.Body(paramsMap)
-
-	req.DoRequest()
-	// res, _ := req.Response()
-	// checkError(err)
-
-	// fmt.Println(req.GetRequest().Body)
-
+	res, _ := req.Response()
 	result, _ := req.String()
 
 	fmt.Println("===========", req.GetRequest())
+	fmt.Println("result: ", res.Header)
 
-	fmt.Println("result: ", result)
-	return Response{}
+	return result
 }
 
 func SetupHeader(req *httplib.BeegoHTTPRequest) {
@@ -140,9 +111,9 @@ func SetupHeader(req *httplib.BeegoHTTPRequest) {
 		"Accept-Language": "zh-CN,zh;q=0.8,gl;q=0.6,zh-TW;q=0.4",
 		"Connection":      "keep-alive",
 		"Content-Type":    "application/x-www-form-urlencoded",
-		"Referer":         "http://music.163.com/",
+		"Referer":         "http://music.163.com",
 		"Host":            "music.163.com",
-		"Cookie":          "appver=1.5.9",
+		"Cookie":          "appver=2.0.2",
 		"User-Agent":      randomUserAgent(),
 	}
 	for key, value := range headers {
