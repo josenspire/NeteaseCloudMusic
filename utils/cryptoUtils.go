@@ -8,7 +8,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"math/big"
-	"math/rand"
 	"strings"
 )
 
@@ -26,15 +25,15 @@ type Crypto struct {
 
 func (ct *Crypto) CreateSecretKey(size int) string {
 	const keys string = `abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789`
-	// ct.SecretKey = GenerateRandomString(keys, 16)
+	rs := GenerateRandomString(keys, 16)
 
 	// 也就是从 a~9 以及 +/ 中随机拿出指定数量的字符拼成一个 key
 	// const keys = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789+/"
-	rs := ""
-	for i := 0; i < size; i++ {
-		pos := rand.Intn(len(keys))
-		rs += keys[pos : pos+1]
-	}
+	// rs := ""
+	// for i := 0; i < size; i++ {
+	// 	pos := rand.Intn(len(keys))
+	// 	rs += keys[pos : pos+1]
+	// }
 	ct.SecretKey = rs
 	return rs
 }
@@ -44,17 +43,13 @@ func (ct *Crypto) Encrypt(originData string) (string, string, error) {
 	// if err != nil {
 	// 	checkError(err)
 	// }
-
 	if strings.EqualFold("", ct.SecretKey) {
 		ct.CreateSecretKey(16)
 	}
-
+	secKey := ct.SecretKey
 	encTextStr, _ := aesEncrypt(originData, nonce)
-	encText, _ := aesEncrypt(encTextStr, ct.SecretKey)
-	encSeckey := ct.RSAEncrypt(ct.SecretKey, pubKey, modulus)
-
-	fmt.Println("==========", encText)
-	fmt.Println("==========", encSeckey)
+	encText, _ := aesEncrypt(encTextStr, secKey)
+	encSeckey := ct.RSAEncrypt(secKey, pubKey, modulus)
 
 	return encText, encSeckey, nil
 }

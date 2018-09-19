@@ -33,7 +33,7 @@ func Login(user User) string {
 
 	params := utils.TransformStruct2Map(user)
 
-	response := utils.NeteaseCloudRequest(cellphoneLoginUrl, params, http.MethodPost)
+	response, _ := utils.NeteaseCloudRequest(cellphoneLoginUrl, params, http.MethodPost)
 	return response
 }
 

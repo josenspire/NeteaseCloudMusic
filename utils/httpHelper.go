@@ -1,12 +1,11 @@
 package utils
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/astaxie/beego/httplib"
 	"log"
-	"math"
 	"math/rand"
+	"net/url"
 	"strings"
 	"time"
 )
@@ -39,24 +38,25 @@ var userAgentList = []string{
 
 func randomUserAgent() string {
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
-	num := math.Floor(r.Float64() * float64(len(userAgentList)))
-	return userAgentList[int(num)]
+	return userAgentList[r.Intn(19)]
 }
 
-// func NeteaseCloudRequest(url string, params interface{}, method string) ([]byte, error) {
-// 	response := Response{}
+// func NeteaseCloudRequest(baseUrl string, params map[string]interface{}, method string) (string, error) {
 //
-// 	byte, err := json.Marshal(params)
+// 	crypto := Crypto{}
+// 	crypto.SecretKey = "BpLnfgDsc2WD8F2q"
+// 	_params := `{"phone":"13631270436","password":"e10adc3949ba59abbe56e057f20f883e","rememberLogin":"true","csrf_token":""}`
+//
+// 	encText, encSeckey, err := crypto.Encrypt(_params)
 // 	checkError(err)
 //
-// 	req, err := http.NewRequest(method, url, bytes.NewBuffer(byte))
+// 	var paramsMap = `params=` + url.QueryEscape(encText) + `&encSeckey=` + url.QueryEscape(encSeckey)
 //
-// 	SetupHeader(req)
+// 	byte, err := json.Marshal(paramsMap)
+// 	checkError(err)
 //
-// 	// if params.Cookie != "" {
-// 	// 	cookie = cookie + "; " + params.Cookie
-// 	// }
-// 	// req.Header.Set("Cookie", cookie)
+// 	req, err := http.NewRequest(method, host+baseUrl, bytes.NewBuffer(byte))
+// 	SetupHeader(req, strconv.Itoa(len(byte)))
 //
 // 	client := &http.Client{}
 // 	resp, err := client.Do(req)
@@ -65,47 +65,22 @@ func randomUserAgent() string {
 // 	}
 // 	defer resp.Body.Close()
 //
-// 	resqHost := resp.Request.Host // 有的代理IP被DNS劫持，不干净
-//
-// 	if !strings.Contains(resqHost, "163") {
-// 		response.SetResponse(http.StatusBadRequest, nil, "Request is error")
-// 		return json.Marshal(response)
+// 	resHost := resp.Request.Host // 有的代理IP被DNS劫持，不干净
+// 	if !strings.Contains(resHost, "163") {
+// 		return "", errors.New("Request error")
 // 	}
 //
-// 	statusCode := resp.StatusCode
+// 	fmt.Println(req.Body)
+//
+// 	// statusCode := resp.StatusCode
 // 	// hea := resp.Header
 //
 // 	body, _ := ioutil.ReadAll(resp.Body)
 //
-// 	response.SetResponse(statusCode, body, "")
-// 	return json.Marshal(response)
+// 	return string(body), nil
 // }
 
-func NeteaseCloudRequest(url string, params map[string]interface{}, method string) string {
-	req := httplib.NewBeegoRequest(host+url, method)
-	// req := httplib.Post(host + url)
-	SetupHeader(req)
-
-	_params, _ := json.Marshal(params)
-	crypto := Crypto{}
-	encText, encSeckey, err := crypto.Encrypt(string(_params))
-	checkError(err)
-
-	paramsMap := `params=` + encText + `&encSeckey=` + encSeckey
-
-	req.Body(paramsMap)
-	res, _ := req.Response()
-	result, _ := req.String()
-
-	fmt.Println("===========", req.GetRequest())
-	fmt.Println("result: ", res.Header)
-
-	return result
-}
-
-func SetupHeader(req *httplib.BeegoHTTPRequest) {
-	// bc := BaseCookie{}
-	// bc.GenerateBaseCookie()
+func SetupHeader(request *httplib.BeegoHTTPRequest) {
 	headers := map[string]string{
 		"Accept":          "*/*",
 		"Accept-Language": "zh-CN,zh;q=0.8,gl;q=0.6,zh-TW;q=0.4",
@@ -115,18 +90,52 @@ func SetupHeader(req *httplib.BeegoHTTPRequest) {
 		"Host":            "music.163.com",
 		"Cookie":          "appver=2.0.2",
 		"User-Agent":      randomUserAgent(),
+		// "Content-Length":  len,
 	}
 	for key, value := range headers {
-		req.Header(key, value)
+		request.Header(key, value)
 	}
 }
 
-func generateCookie(cookie *[]string) {
-	const cookieStr = `appver=1.5.9;os=osx; channel=netease;osver=%E7%89%88%E6%9C%AC%2010.13.2%EF%BC%88%E7%89%88%E5%8F%B7%2017C88%EF%BC%89`
-	cookieArray := strings.Split(cookieStr, ";")
-	for _, ck := range cookieArray {
-		_ = append(*cookie, ck+";Path=/")
+func NeteaseCloudRequest(baseUrl string, params map[string]interface{}, method string) (string, error) {
+	req := httplib.NewBeegoRequest(host+baseUrl, method)
+
+	// _params, _ := json.Marshal(params)
+
+	crypto := Crypto{}
+	crypto.SecretKey = "KLanfgDsc2WD8F2q"
+	_params := `{"phone":"13631270438","password":"e10adc3949ba59abbe56e057f20f883e","rememberLogin":"true"}`
+
+	encText, encSeckey, err := crypto.Encrypt(_params)
+	checkError(err)
+
+	// paramsBody := "params=PaBwf0ljoojLjWSjRWn6mKPWndhYwSLDhHnEUbkSdjpXCHb6ACx08uuTXcnqjmhhvjBIeClm%2FTcqyjEiwKsIFIfnD5%2FUYCulG8c4LjzuKpwToPYSiYaMFxE6aq02CI5BEOsJklkviywLaS95l37OmXPS40Kxu7KuFMke0FyQeOXfo6JPD0Vz6qsht34Kts2F&encSecKey=2e983589cf245726cae4d87690680ec0f58b30948bd99e6698f1d9270bfd12d869c9a54e0ae8885801ab01d16c60bc39420a102907c509a9671a8338932bfd500d3d1560cb2ffaa3e308c8b962a62e1d4c0ffbaf044ca6b41ea8932ad88b1d8355c1e48984c25af6f9ef3dd2ffad216aaeb7cdf8dba533fcef099286ce98e617"
+
+	paramsBody := "params=" + url.QueryEscape(encText) + "&encSeckey=" + url.QueryEscape(encSeckey)
+	fmt.Println("=========", paramsBody)
+
+	// paramsMap = "params=ufNHvI59iN8TFbhtq9L%2F%2BKDk3QryYKHD7RBZBmPL2mS2KgGpEBSQ0wio8D15ZAwCt8PZTW97OO9hC1LQdirkliPA3VSJgTr2GdBimBGW2NNfcUGq7D%2FBNdG0w0qx1sssPyiEzgh0oGRek3ljZxCgfnXMj5uKLPmu497yn%2FqAumVIWtWGFSLnIKW2U7868cWQgf8nskis1gNmxYtTId6AfA%3D%3D&encSecKey=0d3955198b0c79302c116df6196580b6d464d1a06c2f7aa7a798ac4c7d7143ef7edf25dbc3a85d9b420380903b482b8ae1416e35b13cb8c375a80011602ed260ac709fb2873531f2e099ebbfa49d53d6531083f43b7eb65a4acadbbb9a105a5f4df1e3671d85c802183895c254ccf034630d89adb0e89ff5bfc35c36f4c15b4e"
+	// paramsMap := "params=%2BcVGZTV4RnOAXyBj4zhb%2FV6MaIIWRJQAupMkqHmTGiF3AxMTQnGitQZkF5EbZJGu%2ByoruGwdvnd%2Blbr5K90s2ndKr00qkjqeXt%2Bfz00yFG9QJyf1fzuAo7pYxFB7DspLHWwpGGFsbaihzzt63FpOPDoQIXkaOb8G2awBnXu4M0n8pRPo2b5JUuP%2BJzZ3icfhbU4OA1OUm%2B2DJNFcaqExjw%3D%3D&encSecKey=4bfbe6157d2674355339fb2d6a697f664ffa4c8b43cc105d0d437f674b3f77aaf361507060bdea58f610aef07929fd8c3cec616f5510ecf7b8f3b4c8bb013dd66c0e99a3a523cc1e06be5f2112f1565c0037c089a6d886161f31cf3d4c5e5494083504c8d3a1ab48aceed51a877e006e2446d09c3d1e0078aaa7d042db9c78e8"
+
+	SetupHeader(req)
+	req.Body(string(paramsBody))
+	result, _ := req.String()
+
+	fmt.Println("======================:", req.GetRequest())
+	fmt.Println("===========Request Body: ", req.GetRequest().Body)
+	fmt.Println("===========Response Body: ", result)
+
+	req.DoRequest()
+	return result, nil
+}
+
+func generateCookie() string {
+	bc := BaseCookie{}
+	if strings.EqualFold("", bc.BaseCookie) {
+		bc.GenerateBaseCookie()
 	}
+	const cookieStr = `appver=2.0.3;os=osx; channel=netease;osver=%E7%89%88%E6%9C%AC%2010.13.2%EF%BC%88%E7%89%88%E5%8F%B7%2017C88%EF%BC%89;`
+	return cookieStr + bc.BaseCookie
 }
 
 func checkError(err error) {
