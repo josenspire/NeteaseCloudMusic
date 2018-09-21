@@ -3,8 +3,11 @@ package utils
 import (
 	"fmt"
 	"github.com/astaxie/beego/httplib"
+	"github.com/pkg/errors"
+	"io/ioutil"
 	"log"
 	"math/rand"
+	"net/http"
 	"net/url"
 	"strings"
 	"time"
@@ -41,46 +44,94 @@ func randomUserAgent() string {
 	return userAgentList[r.Intn(19)]
 }
 
-// func NeteaseCloudRequest(baseUrl string, params map[string]interface{}, method string) (string, error) {
-//
-// 	crypto := Crypto{}
-// 	crypto.SecretKey = "BpLnfgDsc2WD8F2q"
-// 	_params := `{"phone":"13631270436","password":"e10adc3949ba59abbe56e057f20f883e","rememberLogin":"true","csrf_token":""}`
-//
-// 	encText, encSeckey, err := crypto.Encrypt(_params)
-// 	checkError(err)
-//
-// 	var paramsMap = `params=` + url.QueryEscape(encText) + `&encSeckey=` + url.QueryEscape(encSeckey)
-//
-// 	byte, err := json.Marshal(paramsMap)
-// 	checkError(err)
-//
-// 	req, err := http.NewRequest(method, host+baseUrl, bytes.NewBuffer(byte))
-// 	SetupHeader(req, strconv.Itoa(len(byte)))
-//
-// 	client := &http.Client{}
-// 	resp, err := client.Do(req)
-// 	if err != nil {
-// 		checkError(err)
-// 	}
-// 	defer resp.Body.Close()
-//
-// 	resHost := resp.Request.Host // 有的代理IP被DNS劫持，不干净
-// 	if !strings.Contains(resHost, "163") {
-// 		return "", errors.New("Request error")
-// 	}
-//
-// 	fmt.Println(req.Body)
-//
-// 	// statusCode := resp.StatusCode
-// 	// hea := resp.Header
-//
-// 	body, _ := ioutil.ReadAll(resp.Body)
-//
-// 	return string(body), nil
-// }
+func NeteaseCloudRequest(baseUrl string, params map[string]interface{}, method string) (string, error) {
+	// crypto := Crypto{}
+	// crypto.SecretKey = "BpLnfgDsc2WD8F2q"
+	// _params := `{"phone":"13631270436","password":"e10adc3949ba59abbe56e057f20f883e","rememberLogin":"true","csrf_token":""}`
+	// encText, encSeckey, err := crypto.Encrypt(_params)
+	// checkError(err)
+	// var paramsMap = `params=` + url.QueryEscape(encText) + `&encSeckey=` + encSeckey
 
-func SetupHeader(request *httplib.BeegoHTTPRequest) {
+	// var paramsBody = "params=PaBwf0ljoojLjWSjRWn6mKPWndhYwSLDhHnEUbkSdjpXCHb6ACx08uuTXcnqjmhhvjBIeClm%2fTcqyjEiwKsIFIfnD5%2fUYCulG8c4LjzuKpwToPYSiYaMFxE6aq02CI5BEOsJklkviywLaS95l37OmXPS40Kxu7KuFMke0FyQeOXfo6JPD0Vz6qsht34Kts2F&encSecKey=2e983589cf245726cae4d87690680ec0f58b30948bd99e6698f1d9270bfd12d869c9a54e0ae8885801ab01d16c60bc39420a102907c509a9671a8338932bfd500d3d1560cb2ffaa3e308c8b962a62e1d4c0ffbaf044ca6b41ea8932ad88b1d8355c1e48984c25af6f9ef3dd2ffad216aaeb7cdf8dba533fcef099286ce98e617"
+
+	encText := "PaBwf0ljoojLjWSjRWn6mKPWndhYwSLDhHnEUbkSdjpXCHb6ACx08uuTXcnqjmhhvjBIeClm/TcqyjEiwKsIFIfnD5/UYCulG8c4LjzuKpwToPYSiYaMFxE6aq02CI5BEOsJklkviywLaS95l37OmXPS40Kxu7KuFMke0FyQeOXfo6JPD0Vz6qsht34Kts2F"
+	encSeckey := "2e983589cf245726cae4d87690680ec0f58b30948bd99e6698f1d9270bfd12d869c9a54e0ae8885801ab01d16c60bc39420a102907c509a9671a8338932bfd500d3d1560cb2ffaa3e308c8b962a62e1d4c0ffbaf044ca6b41ea8932ad88b1d8355c1e48984c25af6f9ef3dd2ffad216aaeb7cdf8dba533fcef099286ce98e617"
+
+	client := &http.Client{}
+
+	form := url.Values{}
+	form.Set("params", encText)
+	form.Set("encSecKey", encSeckey)
+	body := strings.NewReader(form.Encode())
+	req, _ := http.NewRequest("POST", host+baseUrl, body)
+	SetupRequestHeader(req)
+
+	response, err := client.Do(req)
+	checkError(err)
+
+	defer response.Body.Close()
+	resBody, resErr := ioutil.ReadAll(response.Body)
+	checkError(resErr)
+
+	fmt.Println(string(resBody))
+	return string(resBody), nil
+}
+
+func NeteaseCloudRequest1(baseUrl string, params map[string]interface{}, method string) (string, error) {
+	// crypto := Crypto{}
+	// crypto.SecretKey = "BpLnfgDsc2WD8F2q"
+	// _params := `{"phone":"13631270436","password":"e10adc3949ba59abbe56e057f20f883e","rememberLogin":"true","csrf_token":""}`
+	// encText, encSeckey, err := crypto.Encrypt(_params)
+	// checkError(err)
+	// var paramsMap = `params=` + url.QueryEscape(encText) + `&encSeckey=` + encSeckey
+
+	var paramsBody = "params=PaBwf0ljoojLjWSjRWn6mKPWndhYwSLDhHnEUbkSdjpXCHb6ACx08uuTXcnqjmhhvjBIeClm%2fTcqyjEiwKsIFIfnD5%2fUYCulG8c4LjzuKpwToPYSiYaMFxE6aq02CI5BEOsJklkviywLaS95l37OmXPS40Kxu7KuFMke0FyQeOXfo6JPD0Vz6qsht34Kts2F&encSecKey=2e983589cf245726cae4d87690680ec0f58b30948bd99e6698f1d9270bfd12d869c9a54e0ae8885801ab01d16c60bc39420a102907c509a9671a8338932bfd500d3d1560cb2ffaa3e308c8b962a62e1d4c0ffbaf044ca6b41ea8932ad88b1d8355c1e48984c25af6f9ef3dd2ffad216aaeb7cdf8dba533fcef099286ce98e617"
+
+	client := &http.Client{}
+	req, err := http.NewRequest(method, host+baseUrl, strings.NewReader(paramsBody))
+	checkError(err)
+	SetupRequestHeader(req)
+
+	resp, err := client.Do(req)
+
+	defer resp.Body.Close()
+
+	resHost := resp.Request.Host // 有的代理IP被DNS劫持，不干净
+	if !strings.Contains(resHost, "163") {
+		return "", errors.New("Request error")
+	}
+
+	body, err := ioutil.ReadAll(resp.Body)
+	checkError(err)
+
+	fmt.Println(string(body))
+
+	return string(body), nil
+
+	// client := &http.Client{}
+	// resp, err := client.Do(req)
+	// checkError(err)
+	// defer resp.Body.Close()
+
+	// resHost := resp.Request.Host // 有的代理IP被DNS劫持，不干净
+	// if !strings.Contains(resHost, "163") {
+	// 	return "", errors.New("Request error")
+	// }
+
+	// fmt.Println("request Body: ", req)
+
+	// statusCode := resp.StatusCode
+	// hea := resp.Header
+
+	// body, _ := ioutil.ReadAll(resp.Body)
+	//
+	// responseBody := string(body)
+	// fmt.Println("=============", responseBody)
+
+	// return responseBody, nil
+}
+
+func SetupRequestHeader(request *http.Request) {
 	headers := map[string]string{
 		"Accept":          "*/*",
 		"Accept-Language": "zh-CN,zh;q=0.8,gl;q=0.6,zh-TW;q=0.4",
@@ -93,39 +144,55 @@ func SetupHeader(request *httplib.BeegoHTTPRequest) {
 		// "Content-Length":  len,
 	}
 	for key, value := range headers {
+		request.Header.Set(key, value)
+	}
+}
+
+func SetupHeader(request *httplib.BeegoHTTPRequest) {
+	headers := map[string]string{
+		"Accept":          "*/*",
+		"Accept-Language": "zh-CN,zh;q=0.8,gl;q=0.6,zh-TW;q=0.4",
+		"Connection":      "keep-alive",
+		"Content-Type":    "application/x-www-form-urlencoded",
+		"Referer":         "http://music.163.com",
+		"Host":            "music.163.com",
+		"Cookie":          "appver=2.0.2",
+		"User-Agent":      randomUserAgent(),
+		// "Content-Length":  strconv.Itoa(contentLength),
+	}
+	for key, value := range headers {
 		request.Header(key, value)
 	}
 }
 
-func NeteaseCloudRequest(baseUrl string, params map[string]interface{}, method string) (string, error) {
+func NeteaseCloudRequest2(baseUrl string, params map[string]interface{}, method string) (string, error) {
 	req := httplib.NewBeegoRequest(host+baseUrl, method)
-
+	// req := httplib.NewBeegoRequest("http://localhost:3010/googlemap", method)
 	// _params, _ := json.Marshal(params)
 
 	crypto := Crypto{}
 	crypto.SecretKey = "KLanfgDsc2WD8F2q"
 	_params := `{"phone":"13631270438","password":"e10adc3949ba59abbe56e057f20f883e","rememberLogin":"true"}`
+	encText, encSeckey, _ := crypto.Encrypt(_params)
 
-	encText, encSeckey, err := crypto.Encrypt(_params)
-	checkError(err)
+	var paramsBody string = "params=" + url.QueryEscape(encText) + "&encSeckey=" + encSeckey
 
-	// paramsBody := "params=PaBwf0ljoojLjWSjRWn6mKPWndhYwSLDhHnEUbkSdjpXCHb6ACx08uuTXcnqjmhhvjBIeClm%2FTcqyjEiwKsIFIfnD5%2FUYCulG8c4LjzuKpwToPYSiYaMFxE6aq02CI5BEOsJklkviywLaS95l37OmXPS40Kxu7KuFMke0FyQeOXfo6JPD0Vz6qsht34Kts2F&encSecKey=2e983589cf245726cae4d87690680ec0f58b30948bd99e6698f1d9270bfd12d869c9a54e0ae8885801ab01d16c60bc39420a102907c509a9671a8338932bfd500d3d1560cb2ffaa3e308c8b962a62e1d4c0ffbaf044ca6b41ea8932ad88b1d8355c1e48984c25af6f9ef3dd2ffad216aaeb7cdf8dba533fcef099286ce98e617"
+	// _encText := "PaBwf0ljoojLjWSjRWn6mKPWndhYwSLDhHnEUbkSdjpXCHb6ACx08uuTXcnqjmhhvjBIeClm/TcqyjEiwKsIFIfnD5/UYCulG8c4LjzuKpwToPYSiYaMFxE6aq02CI5BEOsJklkviywLaS95l37OmXPS40Kxu7KuFMke0FyQeOXfo6JPD0Vz6qsht34Kts2F"
+	// _encSeckey := "2e983589cf245726cae4d87690680ec0f58b30948bd99e6698f1d9270bfd12d869c9a54e0ae8885801ab01d16c60bc39420a102907c509a9671a8338932bfd500d3d1560cb2ffaa3e308c8b962a62e1d4c0ffbaf044ca6b41ea8932ad88b1d8355c1e48984c25af6f9ef3dd2ffad216aaeb7cdf8dba533fcef099286ce98e617"
+	// paramsBody = "params=" + url.QueryEscape(_encText) + "&encSecKey=" + _encSeckey
 
-	paramsBody := "params=" + url.QueryEscape(encText) + "&encSeckey=" + url.QueryEscape(encSeckey)
-	fmt.Println("=========", paramsBody)
+	var _paramsBody = "params=PaBwf0ljoojLjWSjRWn6mKPWndhYwSLDhHnEUbkSdjpXCHb6ACx08uuTXcnqjmhhvjBIeClm%2fTcqyjEiwKsIFIfnD5%2fUYCulG8c4LjzuKpwToPYSiYaMFxE6aq02CI5BEOsJklkviywLaS95l37OmXPS40Kxu7KuFMke0FyQeOXfo6JPD0Vz6qsht34Kts2F&encSecKey=2e983589cf245726cae4d87690680ec0f58b30948bd99e6698f1d9270bfd12d869c9a54e0ae8885801ab01d16c60bc39420a102907c509a9671a8338932bfd500d3d1560cb2ffaa3e308c8b962a62e1d4c0ffbaf044ca6b41ea8932ad88b1d8355c1e48984c25af6f9ef3dd2ffad216aaeb7cdf8dba533fcef099286ce98e617"
 
-	// paramsMap = "params=ufNHvI59iN8TFbhtq9L%2F%2BKDk3QryYKHD7RBZBmPL2mS2KgGpEBSQ0wio8D15ZAwCt8PZTW97OO9hC1LQdirkliPA3VSJgTr2GdBimBGW2NNfcUGq7D%2FBNdG0w0qx1sssPyiEzgh0oGRek3ljZxCgfnXMj5uKLPmu497yn%2FqAumVIWtWGFSLnIKW2U7868cWQgf8nskis1gNmxYtTId6AfA%3D%3D&encSecKey=0d3955198b0c79302c116df6196580b6d464d1a06c2f7aa7a798ac4c7d7143ef7edf25dbc3a85d9b420380903b482b8ae1416e35b13cb8c375a80011602ed260ac709fb2873531f2e099ebbfa49d53d6531083f43b7eb65a4acadbbb9a105a5f4df1e3671d85c802183895c254ccf034630d89adb0e89ff5bfc35c36f4c15b4e"
-	// paramsMap := "params=%2BcVGZTV4RnOAXyBj4zhb%2FV6MaIIWRJQAupMkqHmTGiF3AxMTQnGitQZkF5EbZJGu%2ByoruGwdvnd%2Blbr5K90s2ndKr00qkjqeXt%2Bfz00yFG9QJyf1fzuAo7pYxFB7DspLHWwpGGFsbaihzzt63FpOPDoQIXkaOb8G2awBnXu4M0n8pRPo2b5JUuP%2BJzZ3icfhbU4OA1OUm%2B2DJNFcaqExjw%3D%3D&encSecKey=4bfbe6157d2674355339fb2d6a697f664ffa4c8b43cc105d0d437f674b3f77aaf361507060bdea58f610aef07929fd8c3cec616f5510ecf7b8f3b4c8bb013dd66c0e99a3a523cc1e06be5f2112f1565c0037c089a6d886161f31cf3d4c5e5494083504c8d3a1ab48aceed51a877e006e2446d09c3d1e0078aaa7d042db9c78e8"
+	fmt.Println("Is Equal:", strings.EqualFold(paramsBody, _paramsBody))
+	fmt.Println("Is Compare:", paramsBody, _paramsBody)
 
 	SetupHeader(req)
-	req.Body(string(paramsBody))
+	req.Body(_paramsBody)
+
+	fmt.Println("===========Request Body:", req.GetRequest().Body)
 	result, _ := req.String()
 
-	fmt.Println("======================:", req.GetRequest())
-	fmt.Println("===========Request Body: ", req.GetRequest().Body)
 	fmt.Println("===========Response Body: ", result)
-
-	req.DoRequest()
 	return result, nil
 }
 
