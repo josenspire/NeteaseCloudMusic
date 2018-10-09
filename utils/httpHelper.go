@@ -63,11 +63,10 @@ func NeteaseCloudRequest(baseUrl string, params map[string]interface{}, method s
 	// _params, _ := json.Marshal(params)
 
 	crypto := Crypto{}
-	crypto.SecretKey = "KLanfgDsc2WD8F2q"
-	_params := `{"phone":"13631270438","password":"e10adc3949ba59abbe56e057f20f883e","rememberLogin":"true"}`
-	encText, encSeckey, _ := crypto.Encrypt(_params)
+	_params := `{"phone":"13631270436","password":"e10adc3949ba59abbe56e057f20f883e","rememberLogin":"true"}`
+	encText, encSecKey, _ := crypto.Encrypt(_params)
 
-	paramsBody := "params=" + url.QueryEscape(encText) + "&encSecKey=" + encSeckey
+	paramsBody := "params=" + url.QueryEscape(encText) + "&encSecKey=" + encSecKey
 
 	SetupHeader(req)
 	req.Body(paramsBody)

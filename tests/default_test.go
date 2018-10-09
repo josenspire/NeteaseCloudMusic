@@ -2,15 +2,14 @@ package test
 
 import (
 	_ "NeteaseCloudMusic/routers"
+	"fmt"
+	"github.com/astaxie/beego"
+	. "github.com/smartystreets/goconvey/convey"
 	"net/http"
 	"net/http/httptest"
 	"path/filepath"
 	"runtime"
 	"testing"
-
-	"fmt"
-	"github.com/astaxie/beego"
-	. "github.com/smartystreets/goconvey/convey"
 )
 
 func init() {

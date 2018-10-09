@@ -20,7 +20,7 @@ func TestCreateSecretKey(t *testing.T) {
 	crypto := utils.Crypto{}
 
 	if strings.EqualFold(crypto.SecretKey, "") {
-		crypto.CreateSecretKey()
+		crypto.CreateSecretKey(16)
 	}
 
 	Convey("Subject: Crypto CreateSecretKey Test Station Endpoint\n", t, func() {
@@ -31,52 +31,59 @@ func TestCreateSecretKey(t *testing.T) {
 }
 
 func TestEncrypt(t *testing.T) {
-	const originData string = `{"Username":"13631270436","Password":"123456789"}`
-	crypto := utils.Crypto{}
+	const (
+		originData      = `{"Username":"13631270438","Password":"e10adc3949ba59abbe56e057f20f883e"}`
+		expectEncText   = "MDdJP8+CeWRWJDscZ19LenNYNt3TKjPu0RmMdK5YLgUYMXmW5kYV7bFs1FSEUCZ+ZEWwM30lzdoqQu0+QprEhEVWk76HQpSSF4gF5htnQupxbgYODtaECJfNDD0oY9DcSmjX0vTUH7IIXlBx8tM1Bw=="
+		expectEncSeckey = "2e983589cf245726cae4d87690680ec0f58b30948bd99e6698f1d9270bfd12d869c9a54e0ae8885801ab01d16c60bc39420a102907c509a9671a8338932bfd500d3d1560cb2ffaa3e308c8b962a62e1d4c0ffbaf044ca6b41ea8932ad88b1d8355c1e48984c25af6f9ef3dd2ffad216aaeb7cdf8dba533fcef099286ce98e617"
+	)
+	crypto := utils.Crypto{
+		SecretKey: "KLanfgDsc2WD8F2q",
+	}
 
-	actualResult, _, _ := crypto.Encrypt(originData)
+	encText, encSecKey, _ := crypto.Encrypt(originData)
 
 	Convey("Subject: Crypto Encrypt Test Station Endpoint\n", t, func() {
-		Convey("Encrypt should encrypt the data then return base64 result", func() {
-			So(len(actualResult), ShouldEqual, 152)
+		Convey("Encrypt should encrypt the data then return base64 encText & encSecKey", func() {
+			So(encText, ShouldEqual, expectEncText)
+			So(encSecKey, ShouldEqual, expectEncSeckey)
 		})
 	})
 }
 
-func TestDecrypt(t *testing.T) {
-	const originData string = `{"Username":"james","Password":"123","CsrfToken":"token123"}`
-	const expectationEncryptStr string = "DLAFT%2BWsUAcj3c7DZb9hspl4yyhLWFfh2h%2BsqswVOEh4ApN%2Fz27wN4hWDVZhRvDDm%2BRrEc3%2BOOeVVEwbSzQeDXCLp8MZee9%2BFT41zZSnZUcyzY9iMbgjTHO2nkKeMcuTGW6%2Bnzt4F7MKG9VprsgdMw%3D%3D"
-
-	crypto := utils.Crypto{}
-
-	crypto.SecretKey = "1234567890asdfgh"
-
-	encryptResult, _, _ := crypto.Encrypt(originData)
-
-	actualResult, _ := crypto.Decrypt(encryptResult)
-
-	Convey("Subject: Crypto Decrypt Test Station Endpoint\n", t, func() {
-		Convey("Encrypt Should encrypt originData and return encrypt result", func() {
-			So(encryptResult, ShouldEqual, expectationEncryptStr)
-		})
-		Convey("Decrypt should decrypt the encrypt data and return string result", func() {
-			So(actualResult, ShouldEqual, originData)
-		})
-	})
-}
+// func TestDecrypt(t *testing.T) {
+// 	const (
+// 		originData            = `{"Username":"13631270438","Password":"e10adc3949ba59abbe56e057f20f883e"}`
+// 		expectationEncryptStr = "MDdJP8+CeWRWJDscZ19LenNYNt3TKjPu0RmMdK5YLgUYMXmW5kYV7bFs1FSEUCZ+ZEWwM30lzdoqQu0+QprEhEVWk76HQpSSF4gF5htnQupxbgYODtaECJfNDD0oY9DcSmjX0vTUH7IIXlBx8tM1Bw=="
+// 	)
+// 	crypto := utils.Crypto{
+// 		SecretKey: "KLanfgDsc2WD8F2q",
+// 	}
+//
+// 	encText, _, _ := crypto.Encrypt(originData)
+//
+// 	actualResult, _ := crypto.Decrypt(encText)
+//
+// 	Convey("Subject: Crypto Decrypt Test Station Endpoint\n", t, func() {
+// 		Convey("Encrypt Should encrypt originData and return encrypt result", func() {
+// 			So(encText, ShouldEqual, expectationEncryptStr)
+// 		})
+// 		Convey("Decrypt should decrypt the encrypt data and return string result", func() {
+// 			So(actualResult, ShouldEqual, originData)
+// 		})
+// 	})
+// }
 
 func TestRSAEncrypt(t *testing.T) {
-	const originData string = `{"Username": "james", "Password": "123456"}`
-	const expectation string = `858130a0a5e6c330d4ca8d439841147f1f131ddb7d91e8b2cd2d00556c7e84702b12e0e3347d387e2dbbe53fcefa04008936075bb46b0c1c99c90dcceda33a14900ec3a74579822eebcd1208a8beee14d69180d131aa64100f81a21436d00ebd48ff69f800282c94420dc8d22bad7ee4cd0f48214f81f0eb1484bd60d644f89e`
+	const originData string = `KLanfgDsc2WD8F2q`
+	const expectation string = `2e983589cf245726cae4d87690680ec0f58b30948bd99e6698f1d9270bfd12d869c9a54e0ae8885801ab01d16c60bc39420a102907c509a9671a8338932bfd500d3d1560cb2ffaa3e308c8b962a62e1d4c0ffbaf044ca6b41ea8932ad88b1d8355c1e48984c25af6f9ef3dd2ffad216aaeb7cdf8dba533fcef099286ce98e617`
 
 	const (
-		pubKey = "010001"
-		iv     = "0102030405060708"
+		pubKey  = "010001"
+		modulus = "00e0b509f6259df8642dbc35662901477df22677ec152b5ff68ace615bb7b725152b3ab17a876aea8a5aa76d2e417629ec4ee341f56135fccf695280104e0312ecbda92557c93870114af6c9d05c4f7f0c3685b7a46bee255932575cce10b424d813cfe4875d3e82047b97ddef52741d546b8e289dc6935b3ece0462db0a22b8e7"
 	)
 
 	crypto := utils.Crypto{}
-
-	actualResult := crypto.RSAEncrypt(originData, pubKey, iv)
+	actualResult := crypto.RSAEncrypt(originData, pubKey, modulus)
 
 	Convey("Subject: Crypto RSADecrypt Test Station Endpoint\n", t, func() {
 		Convey("RSAEncrypt should encrypt originData with rsa and return result", func() {
