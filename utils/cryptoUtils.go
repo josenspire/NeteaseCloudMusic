@@ -7,6 +7,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"github.com/astaxie/beego"
 	"math/big"
 	"strings"
 )
@@ -34,11 +35,18 @@ func (ct *Crypto) Encrypt(originData string) (string, string, error) {
 	if strings.EqualFold("", ct.SecretKey) {
 		ct.CreateSecretKey(16)
 	}
-	encTextStr, _ := aesEncrypt(originData, nonce)
-	encText, _ := aesEncrypt(encTextStr, ct.SecretKey)
-	encSecKey := ct.RSAEncrypt(ct.SecretKey, pubKey, modulus)
-
-	return encText, encSecKey, nil
+	if encTextStr, err := aesEncrypt(originData, nonce); err != nil {
+		beego.Error(err.Error())
+		return "", "", err
+	} else {
+		if encText, err := aesEncrypt(encTextStr, ct.SecretKey); err != nil {
+			beego.Error(err.Error())
+			return "", "", err
+		} else {
+			encSecKey := ct.RSAEncrypt(ct.SecretKey, pubKey, modulus)
+			return encText, encSecKey, nil
+		}
+	}
 }
 
 func (ct *Crypto) Decrypt(decodeStr string) (string, error) {

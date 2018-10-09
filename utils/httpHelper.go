@@ -1,11 +1,11 @@
 package utils
 
 import (
+	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/httplib"
 	"log"
 	"math/rand"
 	"net/url"
-	"strings"
 	"time"
 )
 
@@ -40,7 +40,7 @@ func randomUserAgent() string {
 	return userAgentList[r.Intn(19)]
 }
 
-func SetupHeader(request *httplib.BeegoHTTPRequest) {
+func setupHeader(request *httplib.BeegoHTTPRequest) {
 	headers := map[string]string{
 		"Accept":          "*/*",
 		"Accept-Language": "zh-CN,zh;q=0.8,gl;q=0.6,zh-TW;q=0.4",
@@ -50,38 +50,31 @@ func SetupHeader(request *httplib.BeegoHTTPRequest) {
 		"Host":            "music.163.com",
 		"Cookie":          "appver=2.0.2",
 		"User-Agent":      randomUserAgent(),
-		// "Content-Length":  strconv.Itoa(contentLength),
 	}
 	for key, value := range headers {
 		request.Header(key, value)
 	}
 }
 
-func NeteaseCloudRequest(baseUrl string, params map[string]interface{}, method string) (string, error) {
+func NeteaseCloudRequest(baseUrl string, params string, method string) (interface{}, error) {
 	req := httplib.NewBeegoRequest(host+baseUrl, method)
-	// req := httplib.NewBeegoRequest("http://localhost:3010/googlemap", method)
-	// _params, _ := json.Marshal(params)
+	beego.Info(params)
 
 	crypto := Crypto{}
-	_params := `{"phone":"13631270436","password":"e10adc3949ba59abbe56e057f20f883e","rememberLogin":"true"}`
-	encText, encSecKey, _ := crypto.Encrypt(_params)
-
+	encText, encSecKey, err := crypto.Encrypt(params)
+	if err != nil {
+		return nil, err
+	}
 	paramsBody := "params=" + url.QueryEscape(encText) + "&encSecKey=" + encSecKey
 
-	SetupHeader(req)
+	setupHeader(req)
 	req.Body(paramsBody)
 
-	result, _ := req.String()
-	return result, nil
-}
-
-func generateCookie() string {
-	bc := BaseCookie{}
-	if strings.EqualFold("", bc.BaseCookie) {
-		bc.GenerateBaseCookie()
+	if result, err := req.Bytes(); err != nil {
+		return nil, err
+	} else {
+		return TranformByteToJSON(result), nil
 	}
-	const cookieStr = `appver=2.0.3;os=osx; channel=netease;osver=%E7%89%88%E6%9C%AC%2010.13.2%EF%BC%88%E7%89%88%E5%8F%B7%2017C88%EF%BC%89;`
-	return cookieStr + bc.BaseCookie
 }
 
 func checkError(err error) {

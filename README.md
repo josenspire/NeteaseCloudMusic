@@ -1,6 +1,6 @@
 ##### Netease Cloud Music
 
-> Note: Build by Goland and this project just for study.
+> Note: Build by Golang and this project just for study.
 
 
 ---

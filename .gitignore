@@ -16,3 +16,6 @@ lastupdate.tmp
 *.zip
 .idea/*
 *.pprof
+
+commentsRouter_controllers.go
+commentsRouter_.go

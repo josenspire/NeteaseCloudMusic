@@ -18,7 +18,7 @@ func init() {
 
 	beego.Router("/test", &controllers.IndexController{}, "get:RequestTesting")
 
-	ns := beego.NewNamespace("/v1",
+	ns := beego.NewNamespace("/v1/api",
 		beego.NSNamespace("/user",
 			beego.NSRouter("/cellphone", &controllers.UserController{}, "post:CellphoneLogin"),
 		),
