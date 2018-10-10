@@ -73,7 +73,7 @@ func NeteaseCloudRequest(baseUrl string, params string, method string) (interfac
 	if result, err := req.Bytes(); err != nil {
 		return nil, err
 	} else {
-		return TranformByteToJSON(result), nil
+		return TransformByteToJSON(result), nil
 	}
 }
 

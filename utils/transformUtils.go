@@ -25,7 +25,7 @@ func TransformStructToStr(model interface{}) string {
 	}
 }
 
-func TranformByteToJSON(str []byte) interface{} {
+func TransformByteToJSON(str []byte) interface{} {
 	var tsJson interface{}
 	if err := json.Unmarshal(str, &tsJson); err != nil {
 		beego.Error(err.Error())

@@ -9,7 +9,6 @@ package routers
 
 import (
 	"NeteaseCloudMusic/controllers"
-
 	"github.com/astaxie/beego"
 )
 
@@ -19,6 +18,8 @@ func init() {
 	beego.Router("/test", &controllers.IndexController{}, "get:RequestTesting")
 
 	ns := beego.NewNamespace("/v1/api",
+		// api cache checking
+		beego.NSBefore(controllers.ReadApiCache),
 		beego.NSNamespace("/user",
 			beego.NSRouter("/cellphone", &controllers.UserController{}, "post:CellphoneLogin"),
 		),
@@ -31,5 +32,6 @@ func init() {
 			beego.NSRouter("/hot", &controllers.SearchController{}, "post:Search"),
 		),
 	)
+	// register namespace
 	beego.AddNamespace(ns)
 }

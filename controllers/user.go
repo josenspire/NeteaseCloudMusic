@@ -3,7 +3,6 @@ package controllers
 import (
 	"NeteaseCloudMusic/models"
 	"encoding/json"
-	"fmt"
 	"github.com/astaxie/beego"
 	"log"
 )
@@ -43,9 +42,9 @@ func (u *UserController) CellphoneLogin() {
 		return
 	}
 
-	fmt.Println("controller", user)
 	result := models.Login(user)
 
+	WriteApiCache(u.Ctx, result)
 	u.Data["json"] = result
 	u.ServeJSON()
 }
