@@ -9,7 +9,7 @@ import (
 	_ "github.com/astaxie/beego/cache/redis"
 	"github.com/astaxie/beego/context"
 	"net/http"
-	"strings"
+	"reflect"
 	"time"
 )
 
@@ -53,19 +53,16 @@ func ReadApiCache(ct *context.Context) {
 		beego.Error(err.Error())
 		ct.Abort(http.StatusInternalServerError, err.Error())
 	} else {
-		if cacheJson := redis.Get(input.URI()); cacheJson != nil {
+		if cacheJsonObj := redis.Get(input.URI()); cacheJsonObj != nil {
+			cacheJson := utils.TransformInterfaceToMap(cacheJsonObj)
+			cacheRequestBody := cacheJson["requestBody"]
+			requestBody := utils.TransformInterfaceToMap(input.RequestBody)
 
-			// TODO: uncompleted
-			cacheJsonObj := utils.TransformStructToMap(cacheJson.([]byte))
-
-			requestBody := cacheJsonObj["requestBody"]
-
-			if strings.EqualFold(requestBody.(string), string(input.RequestBody[:])) {
-				fmt.Println("IS EQUAL")
+			if reflect.DeepEqual(cacheRequestBody, requestBody) {
+				beego.Info("[API Cache]")
+				ct.Output.SetStatus(http.StatusOK)
+				ct.Output.JSON(cacheJson["responseBody"], true, true)
 			}
-
-			ct.Output.SetStatus(http.StatusOK)
-			ct.Output.Body(cacheJson.([]byte))
 		}
 	}
 }

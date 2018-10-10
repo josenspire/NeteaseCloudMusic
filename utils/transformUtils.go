@@ -17,6 +17,15 @@ func TransformStructToMap(st interface{}) map[string]interface{} {
 	return params
 }
 
+func TransformInterfaceToMap(origin interface{}) map[string]interface{} {
+	var obj map[string]interface{}
+	err := json.Unmarshal(origin.([]byte), &obj)
+	if err != nil {
+		return nil
+	}
+	return obj
+}
+
 func TransformStructToStr(model interface{}) string {
 	if params, err := json.Marshal(model); err != nil {
 		return err.Error()
