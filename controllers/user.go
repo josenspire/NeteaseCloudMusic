@@ -3,8 +3,10 @@ package controllers
 import (
 	"NeteaseCloudMusic/models"
 	"encoding/json"
+	"fmt"
 	"github.com/astaxie/beego"
 	"log"
+	"net/http"
 )
 
 // Operations about Users
@@ -41,12 +43,25 @@ func (u *UserController) CellphoneLogin() {
 		u.ServeJSON()
 		return
 	}
-
-	result := models.Login(user)
-
+	result, cookies := models.Login(user)
 	WriteApiCache(u.Ctx, result)
+
+	for _, cookie := range cookies {
+		fmt.Println("========", cookie)
+		http.SetCookie(u.Ctx.ResponseWriter, cookie)
+	}
+
+	// u.SetSecureCookie("testsecret", "userInfo", strings.Join(cookies, ))
 	u.Data["json"] = result
 	u.ServeJSON()
+
+	// u.Data["json"] = "test"
+	// http.SetCookie(u.Ctx.ResponseWriter, &http.Cookie{
+	// 	Name: "testCookie",
+	// 	Value: "test11111",
+	// })
+	// u.Ctx.SetCookie("testCookie", "test111")
+	// u.ServeJSON()
 }
 
 // @Title logout

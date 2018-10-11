@@ -5,12 +5,16 @@ import (
 	"github.com/astaxie/beego/httplib"
 	"log"
 	"math/rand"
+	"net/http"
 	"net/url"
+	"strings"
 	"time"
 )
 
 const (
-	host = "http://music.163.com"
+	host                = "http://music.163.com"
+	CONNECT_TIME_OUT    = time.Second * 30
+	READ_WRITE_TIME_OUT = time.Second * 30
 )
 
 var userAgentList = []string{
@@ -56,25 +60,37 @@ func setupHeader(request *httplib.BeegoHTTPRequest) {
 	}
 }
 
-func NeteaseCloudRequest(baseUrl string, params string, method string) (interface{}, error) {
-	req := httplib.NewBeegoRequest(host+baseUrl, method)
+func NeteaseCloudRequest(baseUrl string, params string, method string) (interface{}, []*http.Cookie, error) {
 	beego.Info(params)
+	req := httplib.NewBeegoRequest(host+baseUrl, method).SetTimeout(CONNECT_TIME_OUT, READ_WRITE_TIME_OUT)
 
 	crypto := Crypto{}
 	encText, encSecKey, err := crypto.Encrypt(params)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	paramsBody := "params=" + url.QueryEscape(encText) + "&encSecKey=" + encSecKey
 
 	setupHeader(req)
 	req.Body(paramsBody)
 
-	if result, err := req.Bytes(); err != nil {
-		return nil, err
-	} else {
-		return TransformByteToJSON(result), nil
+	var jsonObj interface{}
+	req.ToJSON(&jsonObj)
+
+	res, _ := req.Response()
+	neteaseCookies := res.Cookies()
+	// validNeteaseCookies := replaceCookieDomainScope(neteaseCookies)
+	return jsonObj, neteaseCookies, nil
+}
+
+// replace response's domain scope
+func replaceCookieDomainScope(cookies []*http.Cookie) []string {
+	var cookieArray = make([]string, len(cookies))
+	for i, cookie := range cookies {
+		reCookie := strings.Replace(cookie.String(), "Domain=music.163.com", `Domain=`, -1)
+		cookieArray[i] = reCookie
 	}
+	return cookieArray
 }
 
 func checkError(err error) {

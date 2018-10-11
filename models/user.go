@@ -24,15 +24,15 @@ const (
 	cellphoneLoginUrl = "/weapi/login/cellphone?csrf_token="
 )
 
-func Login(user User) interface{} {
+func Login(user User) (interface{}, []*http.Cookie) {
 	data := []byte(user.Password)
 	has := md5.Sum(data)
 	user.Password = fmt.Sprintf("%x", has)
 
 	params := utils.TransformStructToStr(user)
 
-	response, _ := utils.NeteaseCloudRequest(cellphoneLoginUrl, params, http.MethodPost)
-	return response
+	response, cookies, _ := utils.NeteaseCloudRequest(cellphoneLoginUrl, params, http.MethodPost)
+	return response, cookies
 }
 
 func DeleteUser(uid string) {

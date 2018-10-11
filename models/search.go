@@ -19,6 +19,6 @@ const (
 func SearchSongs(search Search) string {
 	params := utils.TransformStructToStr(search)
 
-	searchResult, _ := utils.NeteaseCloudRequest(searchUrl, params, http.MethodGet)
+	searchResult, _, _ := utils.NeteaseCloudRequest(searchUrl, params, http.MethodGet)
 	return searchResult.(string)
 }
