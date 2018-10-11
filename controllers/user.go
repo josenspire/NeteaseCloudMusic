@@ -3,7 +3,6 @@ package controllers
 import (
 	"NeteaseCloudMusic/models"
 	"encoding/json"
-	"fmt"
 	"github.com/astaxie/beego"
 	"log"
 	"net/http"
@@ -29,9 +28,10 @@ func (u *UserController) Delete() {
 
 // @Title Login
 // @Description Logs user into the system
-// @Param	cellphone		query 	string	true		"The cellphone for login"
+// @Param	phone		query 	string	true		"The cellphone for login"
 // @Param	password		query 	string	true		"The password for login"
-// @Success 200 {string} login success
+// @Param	rememberLogin	query 	string	false		"Remember login status"
+// @Success 200 {json} login success
 // @Failure 403 user not exist
 // @router /login [post]
 func (u *UserController) CellphoneLogin() {
@@ -47,21 +47,10 @@ func (u *UserController) CellphoneLogin() {
 	WriteApiCache(u.Ctx, result)
 
 	for _, cookie := range cookies {
-		fmt.Println("========", cookie)
 		http.SetCookie(u.Ctx.ResponseWriter, cookie)
 	}
-
-	// u.SetSecureCookie("testsecret", "userInfo", strings.Join(cookies, ))
 	u.Data["json"] = result
 	u.ServeJSON()
-
-	// u.Data["json"] = "test"
-	// http.SetCookie(u.Ctx.ResponseWriter, &http.Cookie{
-	// 	Name: "testCookie",
-	// 	Value: "test11111",
-	// })
-	// u.Ctx.SetCookie("testCookie", "test111")
-	// u.ServeJSON()
 }
 
 // @Title logout

@@ -79,18 +79,15 @@ func NeteaseCloudRequest(baseUrl string, params string, method string) (interfac
 
 	res, _ := req.Response()
 	neteaseCookies := res.Cookies()
-	// validNeteaseCookies := replaceCookieDomainScope(neteaseCookies)
+	replaceCookieDomain(neteaseCookies)
 	return jsonObj, neteaseCookies, nil
 }
 
 // replace response's domain scope
-func replaceCookieDomainScope(cookies []*http.Cookie) []string {
-	var cookieArray = make([]string, len(cookies))
-	for i, cookie := range cookies {
-		reCookie := strings.Replace(cookie.String(), "Domain=music.163.com", `Domain=`, -1)
-		cookieArray[i] = reCookie
+func replaceCookieDomain(cookies []*http.Cookie) {
+	for _, cookie := range cookies {
+		cookie.Domain = strings.Replace(cookie.Domain, ".music.163.com", "", -1)
 	}
-	return cookieArray
 }
 
 func checkError(err error) {
