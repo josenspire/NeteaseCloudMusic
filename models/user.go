@@ -7,34 +7,31 @@ import (
 	"net/http"
 )
 
-var (
-	UserList map[string]*User
-)
+type Login interface {
+	CellphoneLogin(params Params)
+}
 
-type User struct {
+type Params struct {
 	Phone         string `json:"phone"`
 	Password      string `json:"password"`
 	RememberLogin string `json:"rememberLogin"`
 }
 
-type Profile struct {
+type User struct {
+	Params
 }
 
 const (
 	cellphoneLoginUrl = "/weapi/login/cellphone?csrf_token="
 )
 
-func Login(user User) (interface{}, []*http.Cookie) {
-	data := []byte(user.Password)
+func (user *User) CellphoneLogin(params Params) (interface{}, []*http.Cookie) {
+	data := []byte(params.Password)
 	has := md5.Sum(data)
-	user.Password = fmt.Sprintf("%x", has)
+	params.Password = fmt.Sprintf("%x", has)
 
-	params := utils.TransformStructToStr(user)
+	reqParams := utils.TransformStructToStr(params)
 
-	response, cookies, _ := utils.NeteaseCloudRequest(cellphoneLoginUrl, params, http.MethodPost)
+	response, cookies, _ := utils.NeteaseCloudRequest(cellphoneLoginUrl, reqParams, http.MethodPost)
 	return response, cookies
-}
-
-func DeleteUser(uid string) {
-	delete(UserList, uid)
 }

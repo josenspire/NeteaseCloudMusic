@@ -20,8 +20,8 @@ type UserController struct {
 // @Failure 403 uid is empty
 // @router /:uid [delete]
 func (u *UserController) Delete() {
-	uid := u.GetString(":uid")
-	models.DeleteUser(uid)
+	// uid := u.GetString(":uid")
+	// models.DeleteUser(uid)
 	u.Data["json"] = "delete success!"
 	u.ServeJSON()
 }
@@ -35,15 +35,17 @@ func (u *UserController) Delete() {
 // @Failure 403 user not exist
 // @router /login [post]
 func (u *UserController) CellphoneLogin() {
-	var user models.User
-
-	if err := json.Unmarshal(u.Ctx.Input.RequestBody, &user); err != nil {
+	resParams := models.Params{}
+	err := json.Unmarshal(u.Ctx.Input.RequestBody, &resParams)
+	if err != nil {
 		log.Fatal(err.Error())
 		u.Data["json"] = "Params error, please check"
 		u.ServeJSON()
 		return
 	}
-	result, cookies := models.Login(user)
+
+	user := &models.User{resParams}
+	result, cookies := user.CellphoneLogin(user.Params)
 	WriteApiCache(u.Ctx, result)
 
 	for _, cookie := range cookies {

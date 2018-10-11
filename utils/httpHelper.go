@@ -12,9 +12,9 @@ import (
 )
 
 const (
-	host                = "http://music.163.com"
-	CONNECT_TIME_OUT    = time.Second * 30
-	READ_WRITE_TIME_OUT = time.Second * 30
+	host             = "http://music.163.com"
+	ConnectTimeOut   = time.Second * 30
+	ReadWriteTimeOut = time.Second * 30
 )
 
 var userAgentList = []string{
@@ -62,7 +62,7 @@ func setupHeader(request *httplib.BeegoHTTPRequest) {
 
 func NeteaseCloudRequest(baseUrl string, params string, method string) (interface{}, []*http.Cookie, error) {
 	beego.Info(params)
-	req := httplib.NewBeegoRequest(host+baseUrl, method).SetTimeout(CONNECT_TIME_OUT, READ_WRITE_TIME_OUT)
+	req := httplib.NewBeegoRequest(host+baseUrl, method).SetTimeout(ConnectTimeOut, ReadWriteTimeOut)
 
 	crypto := Crypto{}
 	encText, encSecKey, err := crypto.Encrypt(params)
