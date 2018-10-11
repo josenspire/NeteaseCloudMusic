@@ -87,4 +87,12 @@ func init() {
 			MethodParams:     param.Make(),
 			Params:           nil})
 
+	beego.GlobalControllerRouter["NeteaseCloudMusic/controllers:UserController"] = append(beego.GlobalControllerRouter["NeteaseCloudMusic/controllers:UserController"],
+		beego.ControllerComments{
+			Method:           "RefreshLogin",
+			Router:           `/refreshLogin`,
+			AllowHTTPMethods: []string{"post"},
+			MethodParams:     param.Make(),
+			Params:           nil})
+
 }

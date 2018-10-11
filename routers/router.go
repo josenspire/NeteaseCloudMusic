@@ -20,8 +20,10 @@ func init() {
 	ns := beego.NewNamespace("/v1/api",
 		// api cache checking
 		beego.NSBefore(controllers.ReadApiCache),
+
 		beego.NSNamespace("/user",
 			beego.NSRouter("/cellphone", &controllers.UserController{}, "post:CellphoneLogin"),
+			beego.NSRouter("/refreshLogin", &controllers.UserController{}, "post:RefreshLogin"),
 		),
 		beego.NSNamespace("/object",
 			beego.NSInclude(

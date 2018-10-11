@@ -7,25 +7,29 @@ import (
 	"net/http"
 )
 
-type Login interface {
-	CellphoneLogin(params Params)
+const (
+	cellphoneLoginUrl = `/weapi/login/cellphone?csrf_token=`
+	refreshLoginUrl   = `/weapi/login/token/refresh?csrf_token=`
+)
+
+type IUserOperation interface {
+	CellphoneLogin() (interface{}, []*http.Cookie)
+	RefreshLoginStatus() (interface{}, []*http.Cookie)
 }
 
-type Params struct {
+type CellphoneLoginParams struct {
 	Phone         string `json:"phone"`
 	Password      string `json:"password"`
 	RememberLogin string `json:"rememberLogin"`
 }
 
 type User struct {
-	Params
+	CellphoneLoginParams
+	Cookies []*http.Cookie
 }
 
-const (
-	cellphoneLoginUrl = "/weapi/login/cellphone?csrf_token="
-)
-
-func (user *User) CellphoneLogin(params Params) (interface{}, []*http.Cookie) {
+func (user *User) CellphoneLogin() (interface{}, []*http.Cookie) {
+	params := user.CellphoneLoginParams
 	data := []byte(params.Password)
 	has := md5.Sum(data)
 	params.Password = fmt.Sprintf("%x", has)
@@ -33,5 +37,10 @@ func (user *User) CellphoneLogin(params Params) (interface{}, []*http.Cookie) {
 	reqParams := utils.TransformStructToStr(params)
 
 	response, cookies, _ := utils.NeteaseCloudRequest(cellphoneLoginUrl, reqParams, http.MethodPost)
+	return response, cookies
+}
+
+func (user *User) RefreshLoginStatus() (interface{}, []*http.Cookie) {
+	response, cookies, _ := utils.NeteaseCloudRequest(cellphoneLoginUrl, "", http.MethodPost)
 	return response, cookies
 }

@@ -35,7 +35,7 @@ func (u *UserController) Delete() {
 // @Failure 403 user not exist
 // @router /login [post]
 func (u *UserController) CellphoneLogin() {
-	resParams := models.Params{}
+	resParams := models.CellphoneLoginParams{}
 	err := json.Unmarshal(u.Ctx.Input.RequestBody, &resParams)
 	if err != nil {
 		log.Fatal(err.Error())
@@ -43,14 +43,28 @@ func (u *UserController) CellphoneLogin() {
 		u.ServeJSON()
 		return
 	}
-
-	user := &models.User{resParams}
-	result, cookies := user.CellphoneLogin(user.Params)
+	user := &models.User{CellphoneLoginParams: resParams}
+	result, cookies := user.CellphoneLogin()
 	WriteApiCache(u.Ctx, result)
 
-	for _, cookie := range cookies {
-		http.SetCookie(u.Ctx.ResponseWriter, cookie)
-	}
+	setupCookies(u.Ctx.ResponseWriter, cookies)
+
+	u.Data["json"] = result
+	u.ServeJSON()
+}
+
+// @Title refresh login
+// @Description Refresh login status
+// @Success 200 {string} refresh success
+// @router /refreshLogin [post]
+func (u *UserController) RefreshLogin() {
+	cookies := u.Ctx.Request.Cookies()
+	user := &models.User{Cookies: cookies}
+	result, cookies := user.RefreshLoginStatus()
+
+	WriteApiCache(u.Ctx, result)
+	setupCookies(u.Ctx.ResponseWriter, cookies)
+
 	u.Data["json"] = result
 	u.ServeJSON()
 }
@@ -62,4 +76,10 @@ func (u *UserController) CellphoneLogin() {
 func (u *UserController) Logout() {
 	u.Data["json"] = "logout success"
 	u.ServeJSON()
+}
+
+func setupCookies(rw http.ResponseWriter, cookies []*http.Cookie) {
+	for _, cookie := range cookies {
+		http.SetCookie(rw, cookie)
+	}
 }
