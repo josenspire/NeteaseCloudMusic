@@ -1,10 +1,5 @@
 package models
 
-import (
-	"NeteaseCloudMusic/utils"
-	"net/http"
-)
-
 type Search struct {
 	KeyWord string
 	Type    int
@@ -17,8 +12,9 @@ const (
 )
 
 func SearchSongs(search Search) string {
-	params := utils.TransformStructToStr(search)
+	// params := utils.TransformStructToStr(search)
 
-	searchResult, _, _ := utils.NeteaseCloudRequest(searchUrl, params, http.MethodGet)
-	return searchResult.(string)
+	// searchResult, _, _ := utils.NeteaseCloudRequest(searchUrl, params, http.MethodGet)
+	// return searchResult.(string)
+	return ""
 }

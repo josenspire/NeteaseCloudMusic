@@ -6,6 +6,7 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
+	"net/http/cookiejar"
 	"net/url"
 	"strings"
 	"time"
@@ -60,12 +61,15 @@ func setupHeader(request *httplib.BeegoHTTPRequest) {
 	}
 }
 
-func NeteaseCloudRequest(baseUrl string, params string, method string) (interface{}, []*http.Cookie, error) {
+func NeteaseCloudRequest(baseUrl string, params string, cookies []*http.Cookie, method string) (interface{}, []*http.Cookie, error) {
 	beego.Info(params)
-	// TODO setup request cookies
-	// var baseCookie = &BaseCookie{}
 
 	req := httplib.NewBeegoRequest(host+baseUrl, method).SetTimeout(ConnectTimeOut, ReadWriteTimeOut)
+	baseCookie := GenerateBaseCookie()
+	setupHeader(req)
+
+	jar, _ := cookiejar.New(nil)
+	jar.SetCookies(req.GetRequest().URL, append(baseCookie, cookies...))
 
 	crypto := Crypto{}
 	encText, encSecKey, err := crypto.Encrypt(params)
@@ -73,8 +77,6 @@ func NeteaseCloudRequest(baseUrl string, params string, method string) (interfac
 		return nil, nil, err
 	}
 	paramsBody := "params=" + url.QueryEscape(encText) + "&encSecKey=" + encSecKey
-
-	setupHeader(req)
 	req.Body(paramsBody)
 
 	var jsonObj interface{}

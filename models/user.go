@@ -37,11 +37,11 @@ func (user *User) CellphoneLogin() (interface{}, []*http.Cookie) {
 
 	reqParams := utils.TransformStructToStr(params)
 
-	response, cookies, _ := utils.NeteaseCloudRequest(cellphoneLoginUrl, reqParams, http.MethodPost)
+	response, cookies, _ := utils.NeteaseCloudRequest(cellphoneLoginUrl, reqParams, user.Cookies, http.MethodPost)
 	return response, cookies
 }
 
 func (user *User) RefreshLoginStatus() (interface{}, []*http.Cookie) {
-	response, cookies, _ := utils.NeteaseCloudRequest(refreshLoginUrl, "", http.MethodPost)
+	response, cookies, _ := utils.NeteaseCloudRequest(refreshLoginUrl, "", user.Cookies, http.MethodPost)
 	return response, cookies
 }

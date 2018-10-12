@@ -43,7 +43,7 @@ func (u *UserController) CellphoneLogin() {
 		u.ServeJSON()
 		return
 	}
-	user := &models.User{CellphoneLoginParams: resParams}
+	user := &models.User{CellphoneLoginParams: resParams, Cookies: u.Ctx.Request.Cookies()}
 	result, cookies := user.CellphoneLogin()
 	WriteApiCache(u.Ctx, result)
 
@@ -58,8 +58,7 @@ func (u *UserController) CellphoneLogin() {
 // @Success 200 {string} refresh success
 // @router /refreshLogin [post]
 func (u *UserController) RefreshLogin() {
-	cookies := u.Ctx.Request.Cookies()
-	user := &models.User{Cookies: cookies}
+	user := &models.User{Cookies: u.Ctx.Request.Cookies()}
 	result, cookies := user.RefreshLoginStatus()
 
 	WriteApiCache(u.Ctx, result)
