@@ -62,6 +62,9 @@ func setupHeader(request *httplib.BeegoHTTPRequest) {
 
 func NeteaseCloudRequest(baseUrl string, params string, method string) (interface{}, []*http.Cookie, error) {
 	beego.Info(params)
+	// TODO setup request cookies
+	// var baseCookie = &BaseCookie{}
+
 	req := httplib.NewBeegoRequest(host+baseUrl, method).SetTimeout(ConnectTimeOut, ReadWriteTimeOut)
 
 	crypto := Crypto{}

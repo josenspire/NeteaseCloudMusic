@@ -26,6 +26,7 @@ type CellphoneLoginParams struct {
 type User struct {
 	CellphoneLoginParams
 	Cookies []*http.Cookie
+	// Cookies ReqCookies
 }
 
 func (user *User) CellphoneLogin() (interface{}, []*http.Cookie) {
@@ -41,6 +42,6 @@ func (user *User) CellphoneLogin() (interface{}, []*http.Cookie) {
 }
 
 func (user *User) RefreshLoginStatus() (interface{}, []*http.Cookie) {
-	response, cookies, _ := utils.NeteaseCloudRequest(cellphoneLoginUrl, "", http.MethodPost)
+	response, cookies, _ := utils.NeteaseCloudRequest(refreshLoginUrl, "", http.MethodPost)
 	return response, cookies
 }
