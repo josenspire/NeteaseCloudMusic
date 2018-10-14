@@ -43,5 +43,6 @@ func (user *User) CellphoneLogin() (interface{}, []*http.Cookie) {
 
 func (user *User) RefreshLoginStatus() (interface{}, []*http.Cookie) {
 	response, cookies, _ := utils.NeteaseCloudRequest(refreshLoginUrl, "", user.Cookies, http.MethodPost)
+	fmt.Println("--------", cookies)
 	return response, cookies
 }

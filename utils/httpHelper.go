@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/httplib"
 	"log"
@@ -71,6 +72,8 @@ func NeteaseCloudRequest(baseUrl string, params string, cookies []*http.Cookie, 
 	jar, _ := cookiejar.New(nil)
 	jar.SetCookies(req.GetRequest().URL, append(baseCookie, cookies...))
 
+	fmt.Println("basecookie", append(baseCookie, cookies...))
+
 	crypto := Crypto{}
 	encText, encSecKey, err := crypto.Encrypt(params)
 	if err != nil {
@@ -84,6 +87,7 @@ func NeteaseCloudRequest(baseUrl string, params string, cookies []*http.Cookie, 
 
 	res, _ := req.Response()
 	neteaseCookies := res.Cookies()
+
 	replaceCookieDomain(neteaseCookies)
 	return jsonObj, neteaseCookies, nil
 }
