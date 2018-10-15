@@ -43,11 +43,12 @@ func (u *UserController) CellphoneLogin() {
 		u.ServeJSON()
 		return
 	}
-	user := &models.User{CellphoneLoginParams: resParams, Cookies: u.Ctx.Request.Cookies()}
+
+	user := &models.User{CellphoneLoginParams: resParams, Cookies: append(u.Ctx.Request.Cookies(), setupDefaultCookie()...)}
 	result, cookies := user.CellphoneLogin()
 	WriteApiCache(u.Ctx, result)
 
-	setupCookies(u.Ctx.ResponseWriter, cookies)
+	setupResponseCookies(u.Ctx.ResponseWriter, cookies)
 
 	u.Data["json"] = result
 	u.ServeJSON()
@@ -62,7 +63,7 @@ func (u *UserController) RefreshLogin() {
 	result, cookies := user.RefreshLoginStatus()
 
 	WriteApiCache(u.Ctx, result)
-	setupCookies(u.Ctx.ResponseWriter, cookies)
+	setupResponseCookies(u.Ctx.ResponseWriter, cookies)
 
 	u.Data["json"] = result
 	u.ServeJSON()
@@ -77,8 +78,17 @@ func (u *UserController) Logout() {
 	u.ServeJSON()
 }
 
-func setupCookies(rw http.ResponseWriter, cookies []*http.Cookie) {
+func setupResponseCookies(rw http.ResponseWriter, cookies []*http.Cookie) {
 	for _, cookie := range cookies {
 		http.SetCookie(rw, cookie)
 	}
+}
+
+func setupDefaultCookie() []*http.Cookie {
+	cookies := make([]*http.Cookie, 4)
+	cookies[0] = &http.Cookie{Name: "appver", Value: "1.5.9"}
+	cookies[1] = &http.Cookie{Name: "os", Value: "osx"}
+	cookies[2] = &http.Cookie{Name: "channel", Value: "netease"}
+	cookies[3] = &http.Cookie{Name: "osver", Value: "%e7%89%88%e6%9c%ac+10.13.2%ef%bc%88%e7%89%88%e5%8f%b7+17C88%ef%bc%89"}
+	return cookies
 }

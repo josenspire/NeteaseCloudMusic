@@ -6,6 +6,7 @@ import (
 	"reflect"
 )
 
+// can not handle key as Hump named
 func TransformStructToMap(st interface{}) map[string]interface{} {
 	t := reflect.TypeOf(st)
 	v := reflect.ValueOf(st)
@@ -26,11 +27,15 @@ func TransformInterfaceToMap(origin interface{}) map[string]interface{} {
 	return obj
 }
 
-func TransformStructToStr(model interface{}) string {
+func TransformStructToJSONMap(model interface{}) (map[string]interface{}, error) {
 	if params, err := json.Marshal(model); err != nil {
-		return err.Error()
+		return nil, err
 	} else {
-		return string(params[:])
+		var paramsMap map[string]interface{}
+		if err = json.Unmarshal([]byte(params), &paramsMap); err != nil {
+			return nil, err
+		}
+		return paramsMap, nil
 	}
 }
 

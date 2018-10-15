@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"NeteaseCloudMusic/models"
 	"github.com/astaxie/beego"
 )
 
@@ -20,9 +21,19 @@ func (i *IndexController) RenderIndex() {
 	i.TplName = "index.tpl"
 }
 
-func (i *IndexController) RequestTesting() {
-	input := i.Ctx.Input.Cookie("user_session")
+func (i *IndexController) CellphoneLogin() {
+	resParams := models.CellphoneLoginParams{}
 
-	i.Data["json"] = input
+	i.Ctx.Input.Bind(&resParams.Phone, "phone")
+	i.Ctx.Input.Bind(&resParams.Password, "password")
+	i.Ctx.Input.Bind(&resParams.RememberLogin, "rememberLogin")
+
+	user := &models.User{CellphoneLoginParams: resParams, Cookies: append(i.Ctx.Request.Cookies(), setupDefaultCookie()...)}
+	result, cookies := user.CellphoneLogin()
+	WriteApiCache(i.Ctx, result)
+
+	setupResponseCookies(i.Ctx.ResponseWriter, cookies)
+
+	i.Data["json"] = result
 	i.ServeJSON()
 }

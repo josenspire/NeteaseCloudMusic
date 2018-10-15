@@ -9,7 +9,7 @@ import (
 
 const (
 	cellphoneLoginUrl = `/weapi/login/cellphone?csrf_token=`
-	refreshLoginUrl   = `/weapi/login/token/refresh?csrf_token=`
+	refreshLoginUrl   = `/weapi/login/token/refresh`
 )
 
 type IUserOperation interface {
@@ -35,14 +35,13 @@ func (user *User) CellphoneLogin() (interface{}, []*http.Cookie) {
 	has := md5.Sum(data)
 	params.Password = fmt.Sprintf("%x", has)
 
-	reqParams := utils.TransformStructToStr(params)
+	reqParams, _ := utils.TransformStructToJSONMap(params)
 
 	response, cookies, _ := utils.NeteaseCloudRequest(cellphoneLoginUrl, reqParams, user.Cookies, http.MethodPost)
 	return response, cookies
 }
 
 func (user *User) RefreshLoginStatus() (interface{}, []*http.Cookie) {
-	response, cookies, _ := utils.NeteaseCloudRequest(refreshLoginUrl, "", user.Cookies, http.MethodPost)
-	fmt.Println("--------", cookies)
+	response, cookies, _ := utils.NeteaseCloudRequest(refreshLoginUrl, nil, user.Cookies, http.MethodPost)
 	return response, cookies
 }

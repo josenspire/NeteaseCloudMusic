@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"fmt"
+	"encoding/json"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/httplib"
 	"log"
@@ -62,8 +62,12 @@ func setupHeader(request *httplib.BeegoHTTPRequest) {
 	}
 }
 
-func NeteaseCloudRequest(baseUrl string, params string, cookies []*http.Cookie, method string) (interface{}, []*http.Cookie, error) {
-	beego.Info(params)
+func NeteaseCloudRequest(baseUrl string, params map[string]interface{}, cookies []*http.Cookie, method string) (interface{}, []*http.Cookie, error) {
+	if params == nil {
+		params = make(map[string]interface{})
+	}
+	params["csrf_token"] = GetCookieValueByName(cookies, "__csrf")
+	beego.Info("[REQUEST]", params)
 
 	req := httplib.NewBeegoRequest(host+baseUrl, method).SetTimeout(ConnectTimeOut, ReadWriteTimeOut)
 	baseCookie := GenerateBaseCookie()
@@ -72,10 +76,9 @@ func NeteaseCloudRequest(baseUrl string, params string, cookies []*http.Cookie, 
 	jar, _ := cookiejar.New(nil)
 	jar.SetCookies(req.GetRequest().URL, append(baseCookie, cookies...))
 
-	fmt.Println("basecookie", append(baseCookie, cookies...))
-
 	crypto := Crypto{}
-	encText, encSecKey, err := crypto.Encrypt(params)
+	reqParams, _ := json.Marshal(params)
+	encText, encSecKey, err := crypto.Encrypt(string(reqParams))
 	if err != nil {
 		return nil, nil, err
 	}
