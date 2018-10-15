@@ -43,12 +43,12 @@ func (u *UserController) CellphoneLogin() {
 		u.ServeJSON()
 		return
 	}
-
-	user := &models.User{CellphoneLoginParams: resParams, Cookies: append(u.Ctx.Request.Cookies(), setupDefaultCookie()...)}
+	defaultCookies := setupDefaultCookie()
+	user := &models.User{CellphoneLoginParams: resParams, Cookies: append(u.Ctx.Request.Cookies(), defaultCookies...)}
 	result, cookies := user.CellphoneLogin()
-	WriteApiCache(u.Ctx, result)
+	models.WriteApiCache(u.Ctx, result)
 
-	setupResponseCookies(u.Ctx.ResponseWriter, cookies)
+	setupResponseCookies(u.Ctx.ResponseWriter, append(cookies, defaultCookies...))
 
 	u.Data["json"] = result
 	u.ServeJSON()
@@ -62,9 +62,16 @@ func (u *UserController) RefreshLogin() {
 	user := &models.User{Cookies: u.Ctx.Request.Cookies()}
 	result, cookies := user.RefreshLoginStatus()
 
-	WriteApiCache(u.Ctx, result)
+	models.WriteApiCache(u.Ctx, result)
 	setupResponseCookies(u.Ctx.ResponseWriter, cookies)
 
+	u.Data["json"] = result
+	u.ServeJSON()
+}
+
+func (u *UserController) QueryUserStatus() {
+	user := &models.User{}
+	result, _ := user.QueryUserStatus()
 	u.Data["json"] = result
 	u.ServeJSON()
 }
@@ -74,6 +81,12 @@ func (u *UserController) RefreshLogin() {
 // @Success 200 {string} logout success
 // @router /logout [get]
 func (u *UserController) Logout() {
+	// user := &models.User{Cookies: u.Ctx.Request.Cookies()}
+	// result, cookies := user.Logout()
+	//
+	// WriteApiCache(u.Ctx, result)
+	// setupResponseCookies(u.Ctx.ResponseWriter, cookies)
+
 	u.Data["json"] = "logout success"
 	u.ServeJSON()
 }

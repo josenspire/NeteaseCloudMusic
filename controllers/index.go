@@ -30,7 +30,7 @@ func (i *IndexController) CellphoneLogin() {
 
 	user := &models.User{CellphoneLoginParams: resParams, Cookies: append(i.Ctx.Request.Cookies(), setupDefaultCookie()...)}
 	result, cookies := user.CellphoneLogin()
-	WriteApiCache(i.Ctx, result)
+	models.WriteApiCache(i.Ctx, result)
 
 	setupResponseCookies(i.Ctx.ResponseWriter, cookies)
 

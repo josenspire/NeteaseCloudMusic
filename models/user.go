@@ -10,11 +10,14 @@ import (
 const (
 	cellphoneLoginUrl = `/weapi/login/cellphone?csrf_token=`
 	refreshLoginUrl   = `/weapi/login/token/refresh`
+	logout            = `/weapi/login/token/logout`
 )
 
 type IUserOperation interface {
 	CellphoneLogin() (interface{}, []*http.Cookie)
 	RefreshLoginStatus() (interface{}, []*http.Cookie)
+	Logout() (interface{}, []*http.Cookie)
+	QueryUserStatus() (interface{}, []*http.Cookie)
 }
 
 type CellphoneLoginParams struct {
@@ -44,4 +47,16 @@ func (user *User) CellphoneLogin() (interface{}, []*http.Cookie) {
 func (user *User) RefreshLoginStatus() (interface{}, []*http.Cookie) {
 	response, cookies, _ := utils.NeteaseCloudRequest(refreshLoginUrl, nil, user.Cookies, http.MethodPost)
 	return response, cookies
+}
+func (user *User) Logout() (interface{}, []*http.Cookie) {
+	// response, cookies, _ := utils.NeteaseCloudRequest(refreshLoginUrl, nil, user.Cookies, http.MethodPost)
+	// return response, cookies
+	return nil, nil
+}
+func (user *User) QueryUserStatus() (interface{}, []*http.Cookie) {
+	responseBody := ReadCacheDataByKey(cellphoneLoginUrl)
+	if responseBody == nil {
+		return "Get Status Fail, Please login first", nil
+	}
+	return responseBody, nil
 }

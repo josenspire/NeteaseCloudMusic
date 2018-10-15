@@ -9,6 +9,7 @@ package routers
 
 import (
 	"NeteaseCloudMusic/controllers"
+	"NeteaseCloudMusic/models"
 	"github.com/astaxie/beego"
 )
 
@@ -19,7 +20,7 @@ func init() {
 
 	ns := beego.NewNamespace("/v1/api",
 		// api cache checking
-		beego.NSBefore(controllers.ReadApiCache),
+		beego.NSBefore(models.ReadApiCache),
 
 		beego.NSNamespace("/user",
 			beego.NSRouter("/cellphone", &controllers.UserController{}, "post:CellphoneLogin"),
