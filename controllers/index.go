@@ -37,3 +37,39 @@ func (i *IndexController) CellphoneLogin() {
 	i.Data["json"] = result
 	i.ServeJSON()
 }
+
+func (i *IndexController) UpdateProfile() {
+	resParams := models.UserProfileParams{}
+
+	i.Ctx.Input.Bind(&resParams.Nickname, "nickname")
+	i.Ctx.Input.Bind(&resParams.Signature, "signature")
+	i.Ctx.Input.Bind(&resParams.Gender, "gender")
+	i.Ctx.Input.Bind(&resParams.Birthday, "birthday")
+	i.Ctx.Input.Bind(&resParams.Province, "province")
+	i.Ctx.Input.Bind(&resParams.City, "city")
+
+	user := &models.User{UserProfileParams: resParams, Cookies: append(i.Ctx.Request.Cookies(), setupDefaultCookie()...)}
+	result, cookies := user.UpdateProfile()
+	models.WriteApiCache(i.Ctx, result)
+
+	setupResponseCookies(i.Ctx.ResponseWriter, cookies)
+
+	i.Data["json"] = result
+	i.ServeJSON()
+}
+
+func (i *IndexController) GetPlayList() {
+	playListParams := models.PlayListParams{}
+	i.Ctx.Input.Bind(&playListParams.Uid, "uid")
+	i.Ctx.Input.Bind(&playListParams.Limit, "limit")
+	i.Ctx.Input.Bind(&playListParams.Offset, "offset")
+
+	user := &models.User{Cookies: i.Ctx.Request.Cookies(), PlayListParams: playListParams}
+	result, cookies := user.GetPlayList()
+
+	models.WriteApiCache(i.Ctx, result)
+	setupResponseCookies(i.Ctx.ResponseWriter, cookies)
+
+	i.Data["json"] = result
+	i.ServeJSON()
+}

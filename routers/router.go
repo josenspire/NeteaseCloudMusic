@@ -16,7 +16,13 @@ import (
 func init() {
 	beego.Router("/", &controllers.IndexController{}, "get:RenderIndex")
 
-	beego.Router("/test/cellphone", &controllers.IndexController{}, "get:CellphoneLogin")
+	idx := beego.NewNamespace("/test",
+		// api cache checking
+		beego.NSBefore(models.ReadApiCache),
+		beego.NSRouter("/cellphone", &controllers.IndexController{}, "get:CellphoneLogin"),
+		beego.NSRouter("/update", &controllers.IndexController{}, "get:UpdateProfile"),
+		beego.NSRouter("/playList", &controllers.IndexController{}, "get:GetPlayList"),
+	)
 
 	ns := beego.NewNamespace("/v1/api",
 		// api cache checking
@@ -25,6 +31,14 @@ func init() {
 		beego.NSNamespace("/user",
 			beego.NSRouter("/cellphone", &controllers.UserController{}, "post:CellphoneLogin"),
 			beego.NSRouter("/refreshLogin", &controllers.UserController{}, "get:RefreshLogin"),
+			// TODO: uncompleted
+			beego.NSRouter("/detail", &controllers.UserController{}, "get:GetUserDetail"),
+
+			beego.NSRouter("/subcount", &controllers.UserController{}, "get:GetUserSubscriptCount"),
+			beego.NSRouter("/update", &controllers.UserController{}, "post:UpdateProfile"),
+
+			// play
+			beego.NSRouter("/playList", &controllers.UserController{}, "post:GetPlayList"),
 		),
 		beego.NSNamespace("/object",
 			beego.NSInclude(
@@ -38,4 +52,5 @@ func init() {
 
 	// register namespace
 	beego.AddNamespace(ns)
+	beego.AddNamespace(idx)
 }

@@ -91,6 +91,87 @@ func (u *UserController) Logout() {
 	u.ServeJSON()
 }
 
+// @Title GetUserDetailInformation
+// @Description Get user detail information
+// @Success 200 {string}
+// @router /detail [get]
+func (u *UserController) GetUserDetail() {
+	uid := u.Ctx.Input.Param("uid")
+	user := &models.User{Cookies: u.Ctx.Request.Cookies()}
+	result, cookies := user.GetUserDetail(uid)
+
+	models.WriteApiCache(u.Ctx, result)
+	setupResponseCookies(u.Ctx.ResponseWriter, cookies)
+
+	u.Data["json"] = result
+	u.ServeJSON()
+}
+
+// @Title GetUserSubscriptCount
+// @Description Get user subscript count information
+// @Success 200 {string}
+// @router /subcount [get]
+func (u *UserController) GetUserSubscriptCount() {
+	user := &models.User{Cookies: u.Ctx.Request.Cookies()}
+	result, cookies := user.GetUserSubscriptCount()
+
+	models.WriteApiCache(u.Ctx, result)
+	setupResponseCookies(u.Ctx.ResponseWriter, cookies)
+
+	u.Data["json"] = result
+	u.ServeJSON()
+}
+
+// @Title UpdateUserInformation
+// @Description Update user profile information
+// @Param    nickname      query    string    true        "User nickname"
+// @Param    signature     query    string    true        "User signature"
+// @Param    gender    	   query    string    true        "User gender"
+// @Param    birthday      query    string    true        "User birthday"
+// @Param    province      query    string    true        "User province"
+// @Param    city    	   query    string    true        "User city"
+// @Success 200 {string}
+// @router /update [post]
+func (u *UserController) UpdateProfile() {
+	userProfile := models.UserProfileParams{}
+	if err := json.Unmarshal(u.Ctx.Input.RequestBody, &userProfile); err != nil {
+		u.Ctx.Abort(http.StatusBadRequest, "Params error, please check your request params")
+	}
+	user := &models.User{Cookies: u.Ctx.Request.Cookies(), UserProfileParams: userProfile}
+	result, cookies := user.UpdateProfile()
+
+	models.WriteApiCache(u.Ctx, result)
+	setupResponseCookies(u.Ctx.ResponseWriter, cookies)
+
+	u.Data["json"] = result
+	u.ServeJSON()
+}
+
+// @Title GetPlayList
+// @Description Get User's Play List
+// @Param    nickname      query    string    true        "User nickname"
+// @Param    signature     query    string    true        "User signature"
+// @Param    gender    	   query    string    true        "User gender"
+// @Param    birthday      query    string    true        "User birthday"
+// @Param    province      query    string    true        "User province"
+// @Param    city    	   query    string    true        "User city"
+// @Success 200 {string}
+// @router /update [post]
+func (u *UserController) GetPlayList() {
+	playListParams := models.PlayListParams{}
+	if err := json.Unmarshal(u.Ctx.Input.RequestBody, &playListParams); err != nil {
+		u.Ctx.Abort(http.StatusBadRequest, "Params error, please check your request params")
+	}
+	user := &models.User{Cookies: u.Ctx.Request.Cookies(), PlayListParams: playListParams}
+	result, cookies := user.GetPlayList()
+
+	models.WriteApiCache(u.Ctx, result)
+	setupResponseCookies(u.Ctx.ResponseWriter, cookies)
+
+	u.Data["json"] = result
+	u.ServeJSON()
+}
+
 func setupResponseCookies(rw http.ResponseWriter, cookies []*http.Cookie) {
 	for _, cookie := range cookies {
 		http.SetCookie(rw, cookie)

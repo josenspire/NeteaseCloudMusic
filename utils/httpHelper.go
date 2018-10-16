@@ -7,7 +7,6 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
-	"net/http/cookiejar"
 	"net/url"
 	"strings"
 	"time"
@@ -62,6 +61,13 @@ func setupHeader(request *httplib.BeegoHTTPRequest) {
 	}
 }
 
+func setupCookies(request *httplib.BeegoHTTPRequest, cookies []*http.Cookie) {
+	for _, cookie := range cookies {
+		request.SetCookie(cookie)
+	}
+
+}
+
 func NeteaseCloudRequest(baseUrl string, params map[string]interface{}, cookies []*http.Cookie, method string) (interface{}, []*http.Cookie, error) {
 	if params == nil {
 		params = make(map[string]interface{})
@@ -69,12 +75,13 @@ func NeteaseCloudRequest(baseUrl string, params map[string]interface{}, cookies 
 	params["csrf_token"] = GetCookieValueByName(cookies, "__csrf")
 	beego.Info("[REQUEST]", params)
 
-	req := httplib.NewBeegoRequest(host+baseUrl, method).SetTimeout(ConnectTimeOut, ReadWriteTimeOut)
+	req := httplib.NewBeegoRequest(host+baseUrl, method).SetTimeout(ConnectTimeOut, ReadWriteTimeOut).SetEnableCookie(true)
 	baseCookie := GenerateBaseCookie()
-	setupHeader(req)
 
-	jar, _ := cookiejar.New(nil)
-	jar.SetCookies(req.GetRequest().URL, append(baseCookie, cookies...))
+	// setup request headers
+	setupHeader(req)
+	// setup request cookies
+	setupCookies(req, append(baseCookie, cookies...))
 
 	crypto := Crypto{}
 	reqParams, _ := json.Marshal(params)
@@ -83,6 +90,7 @@ func NeteaseCloudRequest(baseUrl string, params map[string]interface{}, cookies 
 		return nil, nil, err
 	}
 	paramsBody := "params=" + url.QueryEscape(encText) + "&encSecKey=" + encSecKey
+	beego.Info("[REQUEST ENC DATA]", paramsBody)
 	req.Body(paramsBody)
 
 	var jsonObj interface{}

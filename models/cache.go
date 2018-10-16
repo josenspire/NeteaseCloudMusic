@@ -47,7 +47,7 @@ func ReadApiCache(ct *context.Context) {
 	var reqJson interface{}
 	json.Unmarshal(input.RequestBody, &reqJson)
 
-	fmt.Println("RequestBody:", reqJson)
+	fmt.Println("[RequestBody]:", reqJson)
 
 	if redis, err := GetRedis(); err != nil {
 		beego.Error(err.Error())

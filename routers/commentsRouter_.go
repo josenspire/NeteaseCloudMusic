@@ -73,6 +73,14 @@ func init() {
 
 	beego.GlobalControllerRouter["NeteaseCloudMusic/controllers:UserController"] = append(beego.GlobalControllerRouter["NeteaseCloudMusic/controllers:UserController"],
 		beego.ControllerComments{
+			Method:           "GetUserDetail",
+			Router:           `/detail`,
+			AllowHTTPMethods: []string{"get"},
+			MethodParams:     param.Make(),
+			Params:           nil})
+
+	beego.GlobalControllerRouter["NeteaseCloudMusic/controllers:UserController"] = append(beego.GlobalControllerRouter["NeteaseCloudMusic/controllers:UserController"],
+		beego.ControllerComments{
 			Method:           "CellphoneLogin",
 			Router:           `/login`,
 			AllowHTTPMethods: []string{"post"},
@@ -91,6 +99,30 @@ func init() {
 		beego.ControllerComments{
 			Method:           "RefreshLogin",
 			Router:           `/refreshLogin`,
+			AllowHTTPMethods: []string{"post"},
+			MethodParams:     param.Make(),
+			Params:           nil})
+
+	beego.GlobalControllerRouter["NeteaseCloudMusic/controllers:UserController"] = append(beego.GlobalControllerRouter["NeteaseCloudMusic/controllers:UserController"],
+		beego.ControllerComments{
+			Method:           "GetUserSubscriptCount",
+			Router:           `/subcount`,
+			AllowHTTPMethods: []string{"get"},
+			MethodParams:     param.Make(),
+			Params:           nil})
+
+	beego.GlobalControllerRouter["NeteaseCloudMusic/controllers:UserController"] = append(beego.GlobalControllerRouter["NeteaseCloudMusic/controllers:UserController"],
+		beego.ControllerComments{
+			Method:           "UpdateProfile",
+			Router:           `/update`,
+			AllowHTTPMethods: []string{"post"},
+			MethodParams:     param.Make(),
+			Params:           nil})
+
+	beego.GlobalControllerRouter["NeteaseCloudMusic/controllers:UserController"] = append(beego.GlobalControllerRouter["NeteaseCloudMusic/controllers:UserController"],
+		beego.ControllerComments{
+			Method:           "GetPlayList",
+			Router:           `/update`,
 			AllowHTTPMethods: []string{"post"},
 			MethodParams:     param.Make(),
 			Params:           nil})
