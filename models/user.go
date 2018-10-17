@@ -18,6 +18,9 @@ const (
 	PlayRecord                = `/weapi/v1/play/record`
 	DjRadio                   = `/weapi/djradio/get/byuser`
 	DjRadioSubed              = `/weapi/djradio/get/subed`
+	GetFollows                = `/weapi/user/getfollows`
+	GetFolloweds              = `/weapi/user/getfolloweds`
+	GetEvent                  = `/weapi/event/get`
 )
 
 type IUserOperation interface {
@@ -58,12 +61,25 @@ type DjradioParams struct {
 	Total  string `json:"type"`
 }
 
+type FollowParams struct {
+	Offset int    `json:"offset"`
+	Limit  int    `json:"limit"`
+	Order  string `json:"order"`
+}
+
+type EventParams struct {
+	Time      int  `json:"time"`
+	GetCounts bool `json:"getcounts"`
+}
+
 type User struct {
 	CellphoneLoginParams
 	Cookies []*http.Cookie
 	UserProfileParams
 	PlayListParams
 	DjradioParams
+	FollowParams
+	EventParams
 }
 
 func (user *User) CellphoneLogin() (interface{}, []*http.Cookie) {
@@ -126,5 +142,21 @@ func (user *User) GetDjradioList(uid string) interface{} {
 func (user *User) GetDjradioSubedList() interface{} {
 	reqParams, _ := utils.TransformStructToJSONMap(user.DjradioParams)
 	response, _, _ := utils.NeteaseCloudRequest(DjRadioSubed, reqParams, user.Cookies, http.MethodPost)
+	return response
+}
+func (user *User) GetFollows(uid string) interface{} {
+	reqParams, _ := utils.TransformStructToJSONMap(user.FollowParams)
+	response, _, _ := utils.NeteaseCloudRequest(GetFollows+"/"+uid, reqParams, user.Cookies, http.MethodPost)
+	return response
+}
+func (user *User) GetFolloweds(userId string) interface{} {
+	reqParams, _ := utils.TransformStructToJSONMap(user.FollowParams)
+	reqParams["userId"] = userId
+	response, _, _ := utils.NeteaseCloudRequest(GetFolloweds, reqParams, user.Cookies, http.MethodPost)
+	return response
+}
+func (user *User) GetEvent(uid string) interface{} {
+	reqParams, _ := utils.TransformStructToJSONMap(user.EventParams)
+	response, _, _ := utils.NeteaseCloudRequest(GetEvent+"/"+uid, reqParams, user.Cookies, http.MethodPost)
 	return response
 }

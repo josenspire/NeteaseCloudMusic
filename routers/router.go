@@ -38,11 +38,17 @@ func init() {
 			beego.NSRouter("/subcount", &controllers.UserController{}, "get:GetUserSubscriptCount"),
 			beego.NSRouter("/update", &controllers.UserController{}, "post:UpdateProfile"),
 
-			// play
+			// play & djradio
 			beego.NSRouter("/playList", &controllers.UserController{}, "post:GetPlayList"),
 			beego.NSRouter("/playRecord", &controllers.UserController{}, "post:GetPlayRecord"),
 			beego.NSRouter("/djradio", &controllers.UserController{}, "get:GetDjradioList"),
 			beego.NSRouter("/djradioSubed", &controllers.UserController{}, "get:GetDjradioSubedList"),
+
+			// follows
+			beego.NSRouter("/follows", &controllers.UserController{}, "get:GetFollows"),
+			beego.NSRouter("/followeds", &controllers.UserController{}, "get:GetFolloweds"),
+
+			beego.NSRouter("/event", &controllers.UserController{}, "get:GetEvent"),
 
 			// TODO: uncompleted
 			beego.NSRouter("/detail", &controllers.UserController{}, "get:GetUserDetail"),
@@ -52,6 +58,11 @@ func init() {
 			beego.NSRouter("/send", &controllers.LetterController{}, "get:SendPrivateText"),
 			beego.NSRouter("/sendWithPlaylist", &controllers.LetterController{}, "get:SendWithPlaylist"),
 		),
+
+		beego.NSNamespace("/artist",
+			beego.NSRouter("/list", &controllers.ArtistController{}, "get:GetArtistList"),
+		),
+
 		beego.NSNamespace("/object",
 			beego.NSInclude(
 				&controllers.ObjectController{},

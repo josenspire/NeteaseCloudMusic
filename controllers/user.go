@@ -199,7 +199,7 @@ func (u *UserController) GetPlayList() {
 // @Param    uid      query    string    true        "User id"
 // @Param    type     query    int       true        "Return list type, (-1: include 0&1, 0: allData, 1: weekData)"
 // @Success 200 {string}
-// @router /playList [post]
+// @router /playRecord [post]
 func (u *UserController) GetPlayRecord() {
 	playListParams := models.PlayListParams{}
 	if err := json.Unmarshal(u.Ctx.Input.RequestBody, &playListParams); err != nil {
@@ -220,7 +220,7 @@ func (u *UserController) GetPlayRecord() {
 // @Param    uid      query    string    true        "User id"
 // @Param    type     query    int       true        "Return list type, (-1: include 0&1, 0: allData, 1: weekData)"
 // @Success 200 {string}
-// @router /playList [post]
+// @router /djradio [post]
 func (u *UserController) GetDjradioList() {
 	user := &models.User{Cookies: u.Ctx.Request.Cookies()}
 
@@ -236,7 +236,7 @@ func (u *UserController) GetDjradioList() {
 // @Param    uid      query    string    true        "User id"
 // @Param    type     query    int       true        "Return list type, (-1: include 0&1, 0: allData, 1: weekData)"
 // @Success 200 {string}
-// @router /playList [post]
+// @router /djradioSubed [post]
 func (u *UserController) GetDjradioSubedList() {
 	djradioParams := models.DjradioParams{}
 	u.Ctx.Input.Bind(&djradioParams.Offset, "offset")
@@ -245,6 +245,64 @@ func (u *UserController) GetDjradioSubedList() {
 	user := &models.User{Cookies: u.Ctx.Request.Cookies(), DjradioParams: djradioParams}
 
 	result := user.GetDjradioSubedList()
+	models.WriteApiCache(u.Ctx, result)
+
+	u.Data["json"] = result
+	u.ServeJSON()
+}
+
+// @Title GetFollows
+// @Description Get User's Play List
+// @Param    uid      query    string    true        "User id"
+// @Param    type     query    int       true        "Return list type, (-1: include 0&1, 0: allData, 1: weekData)"
+// @Success 200 {string}
+// @router /follows [post]
+func (u *UserController) GetFollows() {
+	followParams := models.FollowParams{}
+	uid := u.Ctx.Input.Query("uid")
+	u.Ctx.Input.Bind(&followParams.Offset, "offset")
+	u.Ctx.Input.Bind(&followParams.Limit, "limit")
+	user := &models.User{Cookies: u.Ctx.Request.Cookies(), FollowParams: followParams}
+
+	result := user.GetFollows(uid)
+	models.WriteApiCache(u.Ctx, result)
+
+	u.Data["json"] = result
+	u.ServeJSON()
+}
+
+// @Title GetFolloweds
+// @Description Get User's Play List
+// @Param    uid      query    string    true        "User id"
+// @Param    type     query    int       true        "Return list type, (-1: include 0&1, 0: allData, 1: weekData)"
+// @Success 200 {string}
+// @router /followeds [post]
+func (u *UserController) GetFolloweds() {
+	followParams := models.FollowParams{}
+	userId := u.Ctx.Input.Query("uid")
+	u.Ctx.Input.Bind(&followParams.Offset, "offset")
+	u.Ctx.Input.Bind(&followParams.Limit, "limit")
+	user := &models.User{Cookies: u.Ctx.Request.Cookies(), FollowParams: followParams}
+
+	result := user.GetFolloweds(userId)
+	models.WriteApiCache(u.Ctx, result)
+
+	u.Data["json"] = result
+	u.ServeJSON()
+}
+
+// @Title GetFolloweds
+// @Description Get User's Play List
+// @Param    uid      query    string    true        "User id"
+// @Param    type     query    int       true        "Return list type, (-1: include 0&1, 0: allData, 1: weekData)"
+// @Success 200 {string}
+// @router /followeds [post]
+func (u *UserController) GetEvent() {
+	eventParams := models.EventParams{Time: -1, GetCounts: true}
+	uid := u.Ctx.Input.Query("uid")
+	user := &models.User{Cookies: u.Ctx.Request.Cookies(), EventParams: eventParams}
+
+	result := user.GetEvent(uid)
 	models.WriteApiCache(u.Ctx, result)
 
 	u.Data["json"] = result
