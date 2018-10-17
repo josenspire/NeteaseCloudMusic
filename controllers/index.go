@@ -73,3 +73,33 @@ func (i *IndexController) GetPlayList() {
 	i.Data["json"] = result
 	i.ServeJSON()
 }
+
+func (i *IndexController) GetPlayRecord() {
+	playListParams := models.PlayListParams{}
+	i.Ctx.Input.Bind(&playListParams.Uid, "uid")
+	i.Ctx.Input.Bind(&playListParams.Type, "type")
+
+	user := &models.User{Cookies: i.Ctx.Request.Cookies(), PlayListParams: playListParams}
+	result, cookies := user.GetPlayRecord()
+
+	models.WriteApiCache(i.Ctx, result)
+	setupResponseCookies(i.Ctx.ResponseWriter, cookies)
+
+	i.Data["json"] = result
+	i.ServeJSON()
+}
+
+func (i *IndexController) GetPrivateLetter() {
+	letterParams := models.LetterParams{}
+	i.Ctx.Input.Bind(&letterParams.Uid, "uid")
+	// i.Ctx.Input.Bind(&letterParams.Offset, "offset")
+	// i.Ctx.Input.Bind(&letterParams.Limit, "limit")
+
+	letter := &models.Letter{Cookies: i.Ctx.Request.Cookies(), LetterParams: letterParams}
+	result := letter.GetPrivateLetter()
+
+	models.WriteApiCache(i.Ctx, result)
+
+	i.Data["json"] = result
+	i.ServeJSON()
+}

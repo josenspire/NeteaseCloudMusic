@@ -34,6 +34,31 @@ func (u *UserController) Delete() {
 // @Success 200 {json} login success
 // @Failure 403 user not exist
 // @router /login [post]
+func (u *UserController) Login() {
+	resParams := models.CellphoneLoginParams{}
+	u.Ctx.Input.Bind(&resParams.Phone, "phone")
+	u.Ctx.Input.Bind(&resParams.Password, "password")
+	u.Ctx.Input.Bind(&resParams.RememberLogin, "rememberLogin")
+
+	defaultCookies := setupDefaultCookie()
+	user := &models.User{CellphoneLoginParams: resParams, Cookies: append(u.Ctx.Request.Cookies(), defaultCookies...)}
+	result, cookies := user.CellphoneLogin()
+	models.WriteApiCache(u.Ctx, result)
+
+	setupResponseCookies(u.Ctx.ResponseWriter, append(cookies, defaultCookies...))
+
+	u.Data["json"] = result
+	u.ServeJSON()
+}
+
+// @Title Login
+// @Description Logs user into the system
+// @Param	phone		query 	string	true		"The cellphone for login"
+// @Param	password		query 	string	true		"The password for login"
+// @Param	rememberLogin	query 	string	false		"Remember login status"
+// @Success 200 {json} login success
+// @Failure 403 user not exist
+// @router /login [post]
 func (u *UserController) CellphoneLogin() {
 	resParams := models.CellphoneLoginParams{}
 	err := json.Unmarshal(u.Ctx.Input.RequestBody, &resParams)
@@ -81,11 +106,11 @@ func (u *UserController) QueryUserStatus() {
 // @Success 200 {string} logout success
 // @router /logout [get]
 func (u *UserController) Logout() {
-	// user := &models.User{Cookies: u.Ctx.Request.Cookies()}
-	// result, cookies := user.Logout()
-	//
-	// WriteApiCache(u.Ctx, result)
-	// setupResponseCookies(u.Ctx.ResponseWriter, cookies)
+	user := &models.User{Cookies: u.Ctx.Request.Cookies()}
+	result, cookies := user.Logout()
+
+	models.WriteApiCache(u.Ctx, result)
+	setupResponseCookies(u.Ctx.ResponseWriter, cookies)
 
 	u.Data["json"] = "logout success"
 	u.ServeJSON()
@@ -149,14 +174,11 @@ func (u *UserController) UpdateProfile() {
 
 // @Title GetPlayList
 // @Description Get User's Play List
-// @Param    nickname      query    string    true        "User nickname"
-// @Param    signature     query    string    true        "User signature"
-// @Param    gender    	   query    string    true        "User gender"
-// @Param    birthday      query    string    true        "User birthday"
-// @Param    province      query    string    true        "User province"
-// @Param    city    	   query    string    true        "User city"
+// @Param    uid        query    string    true        "User id"
+// @Param    offset     query    int    true        "Play list offset, default 0"
+// @Param    limit      query    int    true        "List limit"
 // @Success 200 {string}
-// @router /update [post]
+// @router /playList [post]
 func (u *UserController) GetPlayList() {
 	playListParams := models.PlayListParams{}
 	if err := json.Unmarshal(u.Ctx.Input.RequestBody, &playListParams); err != nil {
@@ -167,6 +189,63 @@ func (u *UserController) GetPlayList() {
 
 	models.WriteApiCache(u.Ctx, result)
 	setupResponseCookies(u.Ctx.ResponseWriter, cookies)
+
+	u.Data["json"] = result
+	u.ServeJSON()
+}
+
+// @Title GetPlayRecord
+// @Description Get User's Play List
+// @Param    uid      query    string    true        "User id"
+// @Param    type     query    int       true        "Return list type, (-1: include 0&1, 0: allData, 1: weekData)"
+// @Success 200 {string}
+// @router /playList [post]
+func (u *UserController) GetPlayRecord() {
+	playListParams := models.PlayListParams{}
+	if err := json.Unmarshal(u.Ctx.Input.RequestBody, &playListParams); err != nil {
+		u.Ctx.Abort(http.StatusBadRequest, "Params error, please check your request params")
+	}
+	user := &models.User{Cookies: u.Ctx.Request.Cookies()}
+	result, cookies := user.GetPlayRecord()
+
+	models.WriteApiCache(u.Ctx, result)
+	setupResponseCookies(u.Ctx.ResponseWriter, cookies)
+
+	u.Data["json"] = result
+	u.ServeJSON()
+}
+
+// @Title GetDjradioList
+// @Description Get User's Play List
+// @Param    uid      query    string    true        "User id"
+// @Param    type     query    int       true        "Return list type, (-1: include 0&1, 0: allData, 1: weekData)"
+// @Success 200 {string}
+// @router /playList [post]
+func (u *UserController) GetDjradioList() {
+	user := &models.User{Cookies: u.Ctx.Request.Cookies()}
+
+	result := user.GetDjradioList(u.Ctx.Input.Query("uid"))
+	models.WriteApiCache(u.Ctx, result)
+
+	u.Data["json"] = result
+	u.ServeJSON()
+}
+
+// @Title GetDjradioSubedList
+// @Description Get User's Play List
+// @Param    uid      query    string    true        "User id"
+// @Param    type     query    int       true        "Return list type, (-1: include 0&1, 0: allData, 1: weekData)"
+// @Success 200 {string}
+// @router /playList [post]
+func (u *UserController) GetDjradioSubedList() {
+	djradioParams := models.DjradioParams{}
+	u.Ctx.Input.Bind(&djradioParams.Offset, "offset")
+	u.Ctx.Input.Bind(&djradioParams.Limit, "limit")
+	u.Ctx.Input.Bind(&djradioParams.Total, "total")
+	user := &models.User{Cookies: u.Ctx.Request.Cookies(), DjradioParams: djradioParams}
+
+	result := user.GetDjradioSubedList()
+	models.WriteApiCache(u.Ctx, result)
 
 	u.Data["json"] = result
 	u.ServeJSON()

@@ -90,7 +90,6 @@ func NeteaseCloudRequest(baseUrl string, params map[string]interface{}, cookies 
 		return nil, nil, err
 	}
 	paramsBody := "params=" + url.QueryEscape(encText) + "&encSecKey=" + encSecKey
-	beego.Info("[REQUEST ENC DATA]", paramsBody)
 	req.Body(paramsBody)
 
 	var jsonObj interface{}

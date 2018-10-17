@@ -15,6 +15,9 @@ const (
 	GetUserAccountInformation = `/weapi/subcount`
 	UpdateUserInformation     = `/weapi/user/profile/update`
 	PlayList                  = `/weapi/user/playlist`
+	PlayRecord                = `/weapi/v1/play/record`
+	DjRadio                   = `/weapi/djradio/get/byuser`
+	DjRadioSubed              = `/weapi/djradio/get/subed`
 )
 
 type IUserOperation interface {
@@ -25,6 +28,8 @@ type IUserOperation interface {
 	GetUserDetail(uid string) (interface{}, []*http.Cookie)
 	UpdateProfile() (interface{}, []*http.Cookie)
 	GetPlayList() (interface{}, []*http.Cookie)
+	GetPlayRecord() (interface{}, []*http.Cookie)
+	GetDjradioList() interface{}
 }
 
 type CellphoneLoginParams struct {
@@ -44,6 +49,13 @@ type PlayListParams struct {
 	Uid    string `json:"uid"`    // user id
 	Offset int    `json:"offset"` // list offset
 	Limit  int    `json:"limit"`  // count limit
+	Type   int    `json:"type"`   // data type, 0：allData, 1: weekData, -1: allData & weekData
+}
+
+type DjradioParams struct {
+	Offset int    `json:"offset"` // list offset
+	Limit  int    `json:"limit"`  // count limit
+	Total  string `json:"type"`
 }
 
 type User struct {
@@ -51,6 +63,7 @@ type User struct {
 	Cookies []*http.Cookie
 	UserProfileParams
 	PlayListParams
+	DjradioParams
 }
 
 func (user *User) CellphoneLogin() (interface{}, []*http.Cookie) {
@@ -70,8 +83,8 @@ func (user *User) RefreshLoginStatus() (interface{}, []*http.Cookie) {
 	return response, cookies
 }
 func (user *User) Logout() (interface{}, []*http.Cookie) {
-	// response, cookies, _ := utils.NeteaseCloudRequest(RefreshLoginUrl, nil, user.Cookies, http.MethodPost)
-	// return response, cookies
+	response, cookies, _ := utils.NeteaseCloudRequest(Logout, nil, user.Cookies, http.MethodPost)
+	return response, cookies
 	return nil, nil
 }
 func (user *User) QueryUserStatus() (interface{}, []*http.Cookie) {
@@ -98,4 +111,20 @@ func (user *User) GetPlayList() (interface{}, []*http.Cookie) {
 	reqParams, _ := utils.TransformStructToJSONMap(user.PlayListParams)
 	response, cookies, _ := utils.NeteaseCloudRequest(PlayList, reqParams, user.Cookies, http.MethodPost)
 	return response, cookies
+}
+func (user *User) GetPlayRecord() (interface{}, []*http.Cookie) {
+	reqParams, _ := utils.TransformStructToJSONMap(user.PlayListParams)
+	response, cookies, _ := utils.NeteaseCloudRequest(PlayRecord, reqParams, user.Cookies, http.MethodPost)
+	return response, cookies
+}
+func (user *User) GetDjradioList(uid string) interface{} {
+	reqParams := make(map[string]interface{})
+	reqParams["userId"] = uid
+	response, _, _ := utils.NeteaseCloudRequest(DjRadio, reqParams, user.Cookies, http.MethodPost)
+	return response
+}
+func (user *User) GetDjradioSubedList() interface{} {
+	reqParams, _ := utils.TransformStructToJSONMap(user.DjradioParams)
+	response, _, _ := utils.NeteaseCloudRequest(DjRadioSubed, reqParams, user.Cookies, http.MethodPost)
+	return response
 }
