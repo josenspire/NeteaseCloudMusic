@@ -6,11 +6,16 @@ import (
 )
 
 const (
-	GetArtistList = `/weapi/artist/list`
+	GetArtistList     = `/weapi/artist/list`
+	SubscriptArtist   = `/weapi/artist/sub`
+	UnSubscriptArtist = `/weapi/artist/unsub`
 )
 
 type IArtistOperator interface {
 	GetArtistList() interface{}
+	SubscriptArtist(artistId string) interface{}
+	UnSubscriptArtist(artistId string) interface{}
+	GetSubscriptArtistList() interface{}
 }
 
 // @categoryCode
@@ -32,19 +37,43 @@ type IArtistOperator interface {
 // @其他组合/乐队 4003
 type ArtistListParams struct {
 	CategoryCode string `json:"categoryCode"` // category code , default is `1001`
-	Offset       int    `json:"offset"`
-	Total        string `json:"total"`
-	Limit        int    `json:"limit"`
-	Initial      int32  `json:"initial"` // 按首字母索引查找参数
+	Initial      int32  `json:"initial"`      // 按首字母索引查找参数
+}
+
+type ListParams struct {
+	Offset int    `json:"offset"`
+	Limit  int    `json:"limit"`
+	Total  string `json:"total"`
 }
 
 type Artist struct {
 	Cookies []*http.Cookie
 	ArtistListParams
+	ListParams
 }
 
 func (artist *Artist) GetArtistList() interface{} {
-	reqParams, _ := utils.TransformStructToJSONMap(artist.ArtistListParams)
+	artistListParams, _ := utils.TransformStructToJSONMap(artist.ArtistListParams)
+	listParams, _ := utils.TransformStructToJSONMap(artist.ListParams)
+	reqParams := utils.MergeMaps(artistListParams, listParams)
+	response, _, _ := utils.NeteaseCloudRequest(GetArtistList, reqParams, artist.Cookies, http.MethodPost)
+	return response
+}
+func (artist *Artist) SubscriptArtist(artistId string) interface{} {
+	reqParams := make(map[string]interface{})
+	reqParams["artistId"] = artistId
+	response, _, _ := utils.NeteaseCloudRequest(SubscriptArtist, reqParams, artist.Cookies, http.MethodPost)
+	return response
+}
+func (artist *Artist) UnSubscriptArtist(artistId string) interface{} {
+	reqParams := make(map[string]interface{})
+	reqParams["artistId"] = artistId
+	reqParams["artistIds"] = "[" + artistId + "]"
+	response, _, _ := utils.NeteaseCloudRequest(UnSubscriptArtist, reqParams, artist.Cookies, http.MethodPost)
+	return response
+}
+func (artist *Artist) GetSubscriptArtistList() interface{} {
+	reqParams, _ := utils.TransformStructToJSONMap(artist.ListParams)
 	response, _, _ := utils.NeteaseCloudRequest(GetArtistList, reqParams, artist.Cookies, http.MethodPost)
 	return response
 }
