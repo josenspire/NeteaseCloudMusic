@@ -2,9 +2,9 @@ package controllers
 
 import (
 	"NeteaseCloudMusic/models"
-	"fmt"
 	"github.com/astaxie/beego"
 	"strconv"
+	"strings"
 )
 
 type ArtistController struct {
@@ -12,15 +12,14 @@ type ArtistController struct {
 }
 
 func (a *ArtistController) GetArtistList() {
-	artistListParams := models.ArtistListParams{CategoryCode: "1001", Initial: 69, Total: "true", Offset: 0, Limit: 30}
+	artistListParams := models.ArtistListParams{CategoryCode: "1001", Initial: 65, Total: "true", Offset: 0, Limit: 30}
 	if cat := a.Input().Get("cat"); cat != "" {
 		artistListParams.CategoryCode = cat
 	}
 	if initial := a.Input().Get("initial"); initial != "" {
-		runes := []rune("a")
-		// TODO
-		fmt.Println("===========", runes, int(runes[0]), int32(runes[0]))
-		artistListParams.Initial = int(runes[0])
+		// Note: string to unicode char:  `runes := []rune(str)`
+		runes := []rune(strings.ToUpper(initial))
+		artistListParams.Initial = runes[0]
 	}
 	if offset := a.Input().Get("offset"); offset != "" {
 		artistListParams.Offset, _ = strconv.Atoi(offset)

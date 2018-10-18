@@ -35,7 +35,7 @@ type ArtistListParams struct {
 	Offset       int    `json:"offset"`
 	Total        string `json:"total"`
 	Limit        int    `json:"limit"`
-	Initial      int    `json:"initial"` // 按首字母索引查找参数
+	Initial      int32  `json:"initial"` // 按首字母索引查找参数
 }
 
 type Artist struct {
