@@ -105,3 +105,67 @@ func (p *PlaylistController) GetPlaylistDetail() {
 	p.Data["json"] = result
 	p.ServeJSON()
 }
+
+// @Title CreatePlaylist
+// @Description Create playlist
+// @Params name   query    string    true        "play list name"
+// @Success 200 {string}
+// @router /create [get]
+func (p *PlaylistController) CreatePlaylist() {
+	if name := p.Input().Get("name"); name == "" {
+		p.Data["json"] = "Params error, please check your request"
+	} else {
+		playList := models.PlayParams{Cookies: p.Ctx.Request.Cookies()}
+		result := playList.CreatePlaylist(name)
+		models.WriteApiCache(p.Ctx, result)
+
+		p.Data["json"] = result
+	}
+	p.ServeJSON()
+}
+
+// @Title SubscribePlaylist
+// @Description Subscribe playlist
+// @Params  type   		query    string    false        "operation type, 1:收藏,2:取消收藏"
+// @Params  id  		query    string    true         "playlist id"
+// @Success 200 {string}
+// @router /subscribe [get]
+func (p *PlaylistController) SubscribePlaylist() {
+	if id := p.Input().Get("id"); id == "" {
+		p.Data["json"] = "Params error, please check your request"
+	} else {
+		subType := p.Input().Get("type")
+		if subType == "" || subType == "1" {
+			subType = "subscribe"
+		} else {
+			subType = "unsubscribe"
+		}
+
+		playList := models.PlayParams{Cookies: p.Ctx.Request.Cookies()}
+		result := playList.SubscribePlaylist(subType, id)
+		models.WriteApiCache(p.Ctx, result)
+
+		p.Data["json"] = result
+	}
+	p.ServeJSON()
+}
+
+// @Title TrackPlaylistMusic
+// @Description Subscribe playlist
+// @Params  type   		query    string    false        "operation type, 1:收藏,2:取消收藏"
+// @Params  id  		query    string    true         "playlist id"
+// @Success 200 {string}
+// @router /subscribe [get]
+func (p *PlaylistController) TrackPlaylistMusic() {
+	trackParams := models.TrackParams{}
+	p.Ctx.Input.Bind(&trackParams.Op, "op")
+	p.Ctx.Input.Bind(&trackParams.Pid, "pid")
+	p.Ctx.Input.Bind(&trackParams.Tracks, "tracks")
+
+	playList := models.PlayParams{Cookies: p.Ctx.Request.Cookies(), TrackParams: trackParams}
+	result := playList.TrackPlaylistMusic()
+	models.WriteApiCache(p.Ctx, result)
+
+	p.Data["json"] = result
+	p.ServeJSON()
+}

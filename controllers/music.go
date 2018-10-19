@@ -64,3 +64,69 @@ func (m *MusicController) SearchMusic() {
 	m.Data["json"] = result
 	m.ServeJSON()
 }
+
+// @Title GetHotSearchList
+// @Description Get Hot search list
+// @Success 200 {string}
+// @router /search/hot [get]
+func (m *MusicController) GetHotSearchList() {
+	music := models.Music{Cookies: m.Ctx.Request.Cookies()}
+	result := music.GetHotSearchList()
+	models.WriteApiCache(m.Ctx, result)
+
+	m.Data["json"] = result
+	m.ServeJSON()
+}
+
+// @Title GetSearchSuggest
+// @Description Get search suggest
+// @Params keywords   	 query    string    true    "search criteria keywords"
+// @Success 200 {string}
+// @router /search/suggest [get]
+func (m *MusicController) GetSearchSuggest() {
+	if keywords := m.Input().Get("keywords"); keywords == "" {
+		m.Data["json"] = "Params error, please check your request"
+	} else {
+		music := models.Music{Cookies: m.Ctx.Request.Cookies()}
+		result := music.GetSearchSuggest(keywords)
+		models.WriteApiCache(m.Ctx, result)
+		m.Data["json"] = result
+	}
+	m.ServeJSON()
+}
+
+// @Title GetLyric
+// @Description Get music lyric
+// @Params id   	 query    string    true    "music id"
+// @Success 200 {string}
+// @router /lyric [get]
+func (m *MusicController) GetLyric() {
+	if id := m.Input().Get("id"); id == "" {
+		m.Data["json"] = "Params error, please check your request"
+	} else {
+		music := models.Music{Cookies: m.Ctx.Request.Cookies()}
+		result := music.GetLyric(id)
+		models.WriteApiCache(m.Ctx, result)
+
+		m.Data["json"] = result
+	}
+	m.ServeJSON()
+}
+
+// @Title GetMusicDetail
+// @Description Get the song's detail information
+// @Params  id     query    string    true    "music id"
+// @Success 200 {string}
+// @router /lyric [get]
+func (m *MusicController) GetMusicDetail() {
+	if ids := m.Input().Get("ids"); ids == "" {
+		m.Data["json"] = "Params error, please check your request"
+	} else {
+		music := models.Music{Cookies: m.Ctx.Request.Cookies()}
+		result := music.GetMusicDetail(ids)
+		models.WriteApiCache(m.Ctx, result)
+
+		m.Data["json"] = result
+	}
+	m.ServeJSON()
+}

@@ -39,6 +39,62 @@ func init() {
 			MethodParams:     param.Make(),
 			Params:           nil})
 
+	beego.GlobalControllerRouter["NeteaseCloudMusic/controllers:CommentController"] = append(beego.GlobalControllerRouter["NeteaseCloudMusic/controllers:CommentController"],
+		beego.ControllerComments{
+			Method:           "GetAlbumComment",
+			Router:           `/album`,
+			AllowHTTPMethods: []string{"get"},
+			MethodParams:     param.Make(),
+			Params:           nil})
+
+	beego.GlobalControllerRouter["NeteaseCloudMusic/controllers:CommentController"] = append(beego.GlobalControllerRouter["NeteaseCloudMusic/controllers:CommentController"],
+		beego.ControllerComments{
+			Method:           "GetDJComment",
+			Router:           `/dj`,
+			AllowHTTPMethods: []string{"get"},
+			MethodParams:     param.Make(),
+			Params:           nil})
+
+	beego.GlobalControllerRouter["NeteaseCloudMusic/controllers:CommentController"] = append(beego.GlobalControllerRouter["NeteaseCloudMusic/controllers:CommentController"],
+		beego.ControllerComments{
+			Method:           "LikeComment",
+			Router:           `/lick`,
+			AllowHTTPMethods: []string{"get"},
+			MethodParams:     param.Make(),
+			Params:           nil})
+
+	beego.GlobalControllerRouter["NeteaseCloudMusic/controllers:CommentController"] = append(beego.GlobalControllerRouter["NeteaseCloudMusic/controllers:CommentController"],
+		beego.ControllerComments{
+			Method:           "GetMusicComment",
+			Router:           `/music`,
+			AllowHTTPMethods: []string{"get"},
+			MethodParams:     param.Make(),
+			Params:           nil})
+
+	beego.GlobalControllerRouter["NeteaseCloudMusic/controllers:CommentController"] = append(beego.GlobalControllerRouter["NeteaseCloudMusic/controllers:CommentController"],
+		beego.ControllerComments{
+			Method:           "GetPlaylistComment",
+			Router:           `/playlist`,
+			AllowHTTPMethods: []string{"get"},
+			MethodParams:     param.Make(),
+			Params:           nil})
+
+	beego.GlobalControllerRouter["NeteaseCloudMusic/controllers:CommentController"] = append(beego.GlobalControllerRouter["NeteaseCloudMusic/controllers:CommentController"],
+		beego.ControllerComments{
+			Method:           "GetMVComment",
+			Router:           `/playlist`,
+			AllowHTTPMethods: []string{"get"},
+			MethodParams:     param.Make(),
+			Params:           nil})
+
+	beego.GlobalControllerRouter["NeteaseCloudMusic/controllers:CommentController"] = append(beego.GlobalControllerRouter["NeteaseCloudMusic/controllers:CommentController"],
+		beego.ControllerComments{
+			Method:           "Publish",
+			Router:           `/publish`,
+			AllowHTTPMethods: []string{"get"},
+			MethodParams:     param.Make(),
+			Params:           nil})
+
 	beego.GlobalControllerRouter["NeteaseCloudMusic/controllers:IndexController"] = append(beego.GlobalControllerRouter["NeteaseCloudMusic/controllers:IndexController"],
 		beego.ControllerComments{
 			Method:           "RenderIndex",
@@ -57,6 +113,14 @@ func init() {
 
 	beego.GlobalControllerRouter["NeteaseCloudMusic/controllers:MusicController"] = append(beego.GlobalControllerRouter["NeteaseCloudMusic/controllers:MusicController"],
 		beego.ControllerComments{
+			Method:           "GetLyric",
+			Router:           `/lyric`,
+			AllowHTTPMethods: []string{"get"},
+			MethodParams:     param.Make(),
+			Params:           nil})
+
+	beego.GlobalControllerRouter["NeteaseCloudMusic/controllers:MusicController"] = append(beego.GlobalControllerRouter["NeteaseCloudMusic/controllers:MusicController"],
+		beego.ControllerComments{
 			Method:           "GetMusicUrl",
 			Router:           `/musicUrl`,
 			AllowHTTPMethods: []string{"get"},
@@ -67,6 +131,22 @@ func init() {
 		beego.ControllerComments{
 			Method:           "SearchMusic",
 			Router:           `/search`,
+			AllowHTTPMethods: []string{"get"},
+			MethodParams:     param.Make(),
+			Params:           nil})
+
+	beego.GlobalControllerRouter["NeteaseCloudMusic/controllers:MusicController"] = append(beego.GlobalControllerRouter["NeteaseCloudMusic/controllers:MusicController"],
+		beego.ControllerComments{
+			Method:           "GetHotSearchList",
+			Router:           `/search/hot`,
+			AllowHTTPMethods: []string{"get"},
+			MethodParams:     param.Make(),
+			Params:           nil})
+
+	beego.GlobalControllerRouter["NeteaseCloudMusic/controllers:MusicController"] = append(beego.GlobalControllerRouter["NeteaseCloudMusic/controllers:MusicController"],
+		beego.ControllerComments{
+			Method:           "GetSearchSuggest",
+			Router:           `/search/suggest`,
 			AllowHTTPMethods: []string{"get"},
 			MethodParams:     param.Make(),
 			Params:           nil})
@@ -121,6 +201,14 @@ func init() {
 
 	beego.GlobalControllerRouter["NeteaseCloudMusic/controllers:PlaylistController"] = append(beego.GlobalControllerRouter["NeteaseCloudMusic/controllers:PlaylistController"],
 		beego.ControllerComments{
+			Method:           "CreatePlaylist",
+			Router:           `/create`,
+			AllowHTTPMethods: []string{"get"},
+			MethodParams:     param.Make(),
+			Params:           nil})
+
+	beego.GlobalControllerRouter["NeteaseCloudMusic/controllers:PlaylistController"] = append(beego.GlobalControllerRouter["NeteaseCloudMusic/controllers:PlaylistController"],
+		beego.ControllerComments{
 			Method:           "GetPlaylistDetail",
 			Router:           `/detail`,
 			AllowHTTPMethods: []string{"get"},
@@ -147,6 +235,22 @@ func init() {
 		beego.ControllerComments{
 			Method:           "GetNetRecommendList",
 			Router:           `/netRecommend`,
+			AllowHTTPMethods: []string{"get"},
+			MethodParams:     param.Make(),
+			Params:           nil})
+
+	beego.GlobalControllerRouter["NeteaseCloudMusic/controllers:PlaylistController"] = append(beego.GlobalControllerRouter["NeteaseCloudMusic/controllers:PlaylistController"],
+		beego.ControllerComments{
+			Method:           "SubscribePlaylist",
+			Router:           `/subscribe`,
+			AllowHTTPMethods: []string{"get"},
+			MethodParams:     param.Make(),
+			Params:           nil})
+
+	beego.GlobalControllerRouter["NeteaseCloudMusic/controllers:PlaylistController"] = append(beego.GlobalControllerRouter["NeteaseCloudMusic/controllers:PlaylistController"],
+		beego.ControllerComments{
+			Method:           "TrackPlaylistMusic",
+			Router:           `/subscribe`,
 			AllowHTTPMethods: []string{"get"},
 			MethodParams:     param.Make(),
 			Params:           nil})

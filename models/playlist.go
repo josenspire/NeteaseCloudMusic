@@ -11,6 +11,9 @@ const (
 	GetNetRecommend    = `/weapi/playlist/list`
 	GetHighQualityList = `/weapi/playlist/highquality/list`
 	GetPlaylistDetail  = `/weapi/v3/playlist/detail`
+	CreatePlaylist     = `/weapi/playlist/create`
+	SubscribePlaylist  = `/weapi/playlist`
+	TrackPlaylistMusic = `/weapi/playlist/manipulate/tracks`
 )
 
 type IPlayListOperator interface {
@@ -19,6 +22,9 @@ type IPlayListOperator interface {
 	GetNetRecommendList() interface{}
 	GetHighQualityList() interface{}
 	GetPlaylistDetail() interface{}
+	CreatePlaylist(name string) interface{}
+	SubscribePlaylist(subType string, playlistId string) interface{}
+	TrackPlaylistMusic() interface{}
 }
 
 type FeatureParams struct {
@@ -33,10 +39,17 @@ type DetailParams struct {
 	S  int    `json:"s"`
 }
 
+type TrackParams struct {
+	Op     string `json:"op"`
+	Pid    string `json:"pid"`
+	Tracks string `json:"trackIds"`
+}
+
 type PlayParams struct {
 	Cookies []*http.Cookie
 	FeatureParams
 	DetailParams
+	TrackParams
 }
 
 func (play *PlayParams) GetCategoryList() interface{} {
@@ -60,5 +73,22 @@ func (play *PlayParams) GetHighQualityList() interface{} {
 func (play *PlayParams) GetPlaylistDetail() interface{} {
 	reqParams, _ := utils.TransformStructToJSONMap(play.DetailParams)
 	response, _, _ := utils.NeteaseCloudRequest(GetPlaylistDetail, reqParams, play.Cookies, http.MethodPost)
+	return response
+}
+func (play *PlayParams) CreatePlaylist(name string) interface{} {
+	reqParams := make(map[string]interface{})
+	reqParams["name"] = name
+	response, _, _ := utils.NeteaseCloudRequest(CreatePlaylist, reqParams, play.Cookies, http.MethodPost)
+	return response
+}
+func (play *PlayParams) SubscribePlaylist(subType string, playlistId string) interface{} {
+	reqParams := make(map[string]interface{})
+	reqParams["id"] = playlistId
+	response, _, _ := utils.NeteaseCloudRequest(SubscribePlaylist+"/"+subType, reqParams, play.Cookies, http.MethodPost)
+	return response
+}
+func (play *PlayParams) TrackPlaylistMusic() interface{} {
+	reqParams, _ := utils.TransformStructToJSONMap(play.TrackParams)
+	response, _, _ := utils.NeteaseCloudRequest(TrackPlaylistMusic, reqParams, play.Cookies, http.MethodPost)
 	return response
 }
