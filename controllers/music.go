@@ -113,17 +113,17 @@ func (m *MusicController) GetLyric() {
 	m.ServeJSON()
 }
 
-// @Title GetMusicDetail
+// @Title GetSongDetail
 // @Description Get the song's detail information
-// @Params  id     query    string    true    "music id"
+// @Params  ids     query    string    true    "music id"
 // @Success 200 {string}
 // @router /lyric [get]
-func (m *MusicController) GetMusicDetail() {
+func (m *MusicController) GetSongDetail() {
 	if ids := m.Input().Get("ids"); ids == "" {
 		m.Data["json"] = "Params error, please check your request"
 	} else {
 		music := models.Music{Cookies: m.Ctx.Request.Cookies()}
-		result := music.GetMusicDetail(ids)
+		result := music.GetSongDetail(ids)
 		models.WriteApiCache(m.Ctx, result)
 
 		m.Data["json"] = result

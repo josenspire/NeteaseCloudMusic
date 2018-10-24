@@ -11,6 +11,7 @@ const (
 	GetHotSearchList = `/weapi/search/hot`
 	SearchSuggest    = `/weapi/search/suggest/web`
 	GetMusicLyric    = `/weapi/song/lyric?os=osx&id=`
+	GetSongDetail    = `/weapi/v3/song/detail`
 )
 
 type IMusicOperator interface {
@@ -67,9 +68,10 @@ func (music *Music) GetLyric(id string) interface{} {
 	response, _, _ := utils.NeteaseCloudRequest(GetMusicLyric+id+postfix, nil, music.Cookies, http.MethodPost)
 	return response
 }
-func (music *Music) GetMusicDetail(s string) interface{} {
-	// TODO
-	postfix := `&lv=-1&kv=-1&tv=-1`
-	response, _, _ := utils.NeteaseCloudRequest(GetMusicLyric+id+postfix, nil, music.Cookies, http.MethodPost)
+func (music *Music) GetSongDetail(ids string) interface{} {
+	reqParams := make(map[string]interface{})
+	reqParams["c"] = "[{id:" + ids + "}]"
+	reqParams["ids"] = "[" + ids + "]"
+	response, _, _ := utils.NeteaseCloudRequest(GetSongDetail, reqParams, music.Cookies, http.MethodPost)
 	return response
 }

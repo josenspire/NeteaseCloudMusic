@@ -87,7 +87,7 @@ func init() {
 			beego.NSRouter("/search/hot", &controllers.MusicController{}, "get:GetHotSearchList"),
 			beego.NSRouter("/search/suggest", &controllers.MusicController{}, "get:GetSearchSuggest"),
 			beego.NSRouter("/lyric", &controllers.MusicController{}, "get:GetLyric"),
-			beego.NSRouter("/detail", &controllers.MusicController{}, "get:GetMusicDetail"),
+			beego.NSRouter("/detail", &controllers.MusicController{}, "get:GetSongDetail"),
 		),
 
 		beego.NSNamespace("/comment",
